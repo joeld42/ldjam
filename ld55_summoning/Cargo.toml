@@ -18,3 +18,4 @@ resolver = "2" # Important! wgpu/Bevy needs this!
 
 [dependencies]
 bevy = "0.13"
+rand = "0.8.5"
