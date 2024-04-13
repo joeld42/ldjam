@@ -14,7 +14,6 @@ impl Default for MapSpaceContents {
 
 
 
-
 #[derive(Copy, Clone, Default, Debug)]
 pub struct MapSpace {
     pub contents : MapSpaceContents,

@@ -20,7 +20,7 @@ use crate::gamestate::GameMap;
 use crate::gamestate::MapSpaceContents;
 pub mod gamestate;
 
-const HEX_SZ : f32 = 3.0;
+const HEX_SZ : f32 = 1.0;
 
 #[derive(Resource,Default)]
 struct CardDeck {
@@ -113,14 +113,16 @@ fn setup(
     // cube
     commands.spawn(PbrBundle {
         mesh: meshes.add(Cuboid::new(1.0, 1.0, 1.0)),
-        material: materials.add(Color::rgb_u8(124, 144, 255)),        
-        transform: Transform::from_xyz(0.0, 0.5, 0.0),
+        material: materials.add(Color::rgb_u8(255, 144, 10)),        
+        transform: Transform::from_xyz(5.0, 0.5, 5.0),
         ..default()
     });
     
     // light
     commands.spawn(PointLightBundle {
         point_light: PointLight {
+            color : Color::rgb_u8( 75, 187, 235 ),
+            intensity: 20_000_000.0,
             shadows_enabled: true,
             ..default()
         },
@@ -131,6 +133,7 @@ fn setup(
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
             illuminance: 320.0,
+            color : Color::rgb_u8( 20, 187, 200 ),
             //shadows_enabled: true,
             ..default()
         },
@@ -145,7 +148,8 @@ fn setup(
                 hdr: true,
                 ..default()
             },
-            transform: Transform::from_xyz(-2.5, 4.5, 9.0).looking_at(Vec3::ZERO, Vec3::Y),
+            transform: Transform::from_xyz( 0.0, 15.0, 12.0)
+                                    .looking_at( Vec3 { x:0.0, y: 0.0, z : 3.0 }, Vec3::Y),
             tonemapping: Tonemapping::TonyMcMapface,         
             ..default()
             },
@@ -216,8 +220,14 @@ fn worldpos_from_mapindex( mapindex : i32 ) -> Vec3
     let row : i32 = mapindex / (gamestate::MAP_SZ as i32);
     let col : i32 = mapindex % (gamestate::MAP_SZ as i32);
 
-    // Make a vec3 from row and col
-    Vec3::new((col as f32 - 5.0) * HEX_SZ, 0.0, (row as f32 - 5.0) * HEX_SZ )    
+    // offset if col is odd
+    
+
+    // Make a vec3 from row and col        
+    let sqrt3 = 1.7320508075688772;
+    let offset = if col % 2 == 1 { HEX_SZ * sqrt3 / 2.0 } else { 0.0 };
+    Vec3::new((col as f32 - 4.5) * (HEX_SZ * (3.0/2.0) ), 0.0,
+    (-row as f32 + 5.0) * (HEX_SZ * sqrt3) + offset )
 }
 
 // fn spawn_mapspace_empty( mut commands: Commands ) -> Entity {
@@ -230,6 +240,7 @@ fn worldpos_from_mapindex( mapindex : i32 ) -> Vec3
 // }
 
 fn build_map (
+    asset_server: Res<AssetServer>,
     mut commands: Commands,
     mut gamestate: ResMut<GameState>,
     mut meshes: ResMut<Assets<Mesh>>,    
@@ -247,7 +258,7 @@ fn build_map (
 
         let hex_pos = worldpos_from_mapindex( map_space.ndx );
 
-        if hex_pos.length() < 8.0 {
+        if hex_pos.length() < 100.0 {
             //println!("Map includes hex {}, World Position: {:?} len {}", map_space.ndx, hex_pos, hex_pos.length());
             if rng.gen_ratio(1, 8) {
                 map_space.contents = MapSpaceContents::Blocked;
@@ -258,6 +269,9 @@ fn build_map (
     }
 
     // Now build the map visuals based on the map data
+
+    let hex_scene = asset_server.load("hexagon.glb#Scene0");
+
     let mut map_visuals = Vec::new();
     for map_space in &gamestate.map {
         let hex_pos = worldpos_from_mapindex( map_space.ndx );
@@ -265,19 +279,18 @@ fn build_map (
             MapSpaceContents::NotInMap => Entity::PLACEHOLDER,
             MapSpaceContents::Blocked => {
                 commands.spawn(PbrBundle {
-                    mesh: meshes.add(Cuboid::new(1.5, 3.0, 1.5)),
+                    mesh: meshes.add(Cuboid::new(1.0, 3.0, 1.0)),
                     material: materials.add(Color::rgb_u8(96, 60, 100)),        
                     transform: Transform::from_translation( hex_pos ),
                     ..default()
                 }).id()
             },
             MapSpaceContents::Playable => {
-                commands.spawn(PbrBundle {
-                            mesh: meshes.add(Cuboid::new(2.0, 0.3, 2.0)),
-                            material: materials.add(Color::rgb_u8(96, 255, 130)),        
-                            transform: Transform::from_translation( hex_pos ),
-                            ..default()
-                        }).id()
+                commands.spawn( SceneBundle {
+                    scene: hex_scene.clone(),
+                    transform: Transform::from_translation( hex_pos ),                    
+                    ..default()
+                }  ).id()
             },
         };
 
