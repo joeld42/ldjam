@@ -22,6 +22,7 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,    
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     asset_server: Res<AssetServer>
 ) {
     // circular base
@@ -55,7 +56,18 @@ fn setup(
     });
 
 
-    // 2D scene
+
+    // 2D scene -------------------------------
+    // Load card atlas
+    let texture = asset_server.load("cardfish_cards.png");
+    let layout = TextureAtlasLayout::from_grid(
+        Vec2::new(180.0, 256.0), 11, 2, None, None);
+    let texture_atlas_layout = texture_atlas_layouts.add(layout);
+
+
+    
+
+
     commands.spawn(Camera2dBundle { 
         camera: Camera {
             order: 2, // Draw sprites on top of 3d world
@@ -63,6 +75,17 @@ fn setup(
         },
         ..default()
     });
+
+    commands.spawn((
+        SpriteSheetBundle {
+            texture,
+            atlas: TextureAtlas {
+                layout: texture_atlas_layout,
+                index: 0,
+            },            
+            ..default()
+        },        
+    ));
 
     commands.spawn(SpriteBundle {
         texture: asset_server.load("bevy_bird_dark.png"),
