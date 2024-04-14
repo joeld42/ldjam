@@ -8,7 +8,7 @@ use bevy::{
     },
     pbr::NotShadowCaster,
     prelude::*,    
-    render::{color, mesh::VertexAttributeValues, texture::{ImageAddressMode, ImageSamplerDescriptor}},
+    render::{camera, color, mesh::VertexAttributeValues, texture::{ImageAddressMode, ImageSamplerDescriptor}}, text,
 
 };
 
@@ -30,12 +30,21 @@ struct CardDeck {
     // todo: card stats, etc 
 }
 
+#[derive(Default, PartialEq)]
+enum PlayerType {
+    Local,
+    AI, // AI(AIPolicy)
+    #[default]
+    NotActive
+}
+
 #[derive(Default)]
 struct PlayerStuff
 {
     color: Color,
     color2 : Color,
     ring_mtl: [ Handle<StandardMaterial>; 21 ],
+    ptype : PlayerType,
 }
 
 // Resource  stuff
@@ -52,10 +61,14 @@ enum GameStateChanged {
     CircleSplit(i32,i32),  // old ndx -> new ndx
 }
 
+#[derive(Event)]
+struct TurnAdvance(i32); 
+
 #[derive(Resource)]
 struct GameState {
     map : GameMap,
     map_visuals: Vec<Entity>,
+    player_turn : i32,    
 }
 
 impl Default for GameState {
@@ -63,6 +76,7 @@ impl Default for GameState {
         GameState {
             map: GameMap::default(),
             map_visuals: Vec::new(),
+            player_turn: 0,
         }
     }
 }
@@ -74,11 +88,20 @@ struct Ground;
 struct GameCamera;
 
 #[derive(Component)]
+struct PlayerHelp;
+
+#[derive(Component)]
 struct GameCursor {
     ndx : usize,
     cursor_world : Vec3,
     drag_from : Option<usize>,
     drag_dest : Option<usize>,
+    split_pct : f32,
+}
+
+#[derive(Component)]
+struct SplitLabel {
+    is_dest : bool
 }
 
 
@@ -119,7 +142,9 @@ fn main() {
         .add_systems( Update, handle_input )
         .add_systems( Update, on_gamestate_changed )
         .add_systems( Update, draw_split_feedback )
+        .add_systems( Update, player_guidance )
         .add_event::<GameStateChanged>()
+        .add_event::<TurnAdvance>()
         .run();
 }
 
@@ -184,15 +209,15 @@ fn setup(
 
     stuff.player_stuff[0].color  = Color::rgb_u8(255, 113, 206);
     stuff.player_stuff[0].color2 = Color::rgb_u8(161, 45, 172 );
+    
+    stuff.player_stuff[1].color  = Color::rgb_u8(1, 205, 254);
+    stuff.player_stuff[1].color2 = Color::rgb_u8(1, 150, 114);
 
-    stuff.player_stuff[1].color  = Color::rgb_u8(185, 103, 255);
-    stuff.player_stuff[1].color2 = Color::rgb_u8(52, 37, 174);
+    stuff.player_stuff[2].color  = Color::rgb_u8(5, 254, 161);
+    stuff.player_stuff[2].color2 = Color::rgb_u8(1, 152, 30);
 
-    stuff.player_stuff[2].color  = Color::rgb_u8(1, 205, 254);
-    stuff.player_stuff[2].color2 = Color::rgb_u8(1, 150, 114);
-
-    stuff.player_stuff[3].color  = Color::rgb_u8(5, 254, 161);
-    stuff.player_stuff[3].color2 = Color::rgb_u8(1, 152, 30);
+    stuff.player_stuff[3].color  = Color::rgb_u8(185, 103, 255);
+    stuff.player_stuff[3].color2 = Color::rgb_u8(52, 37, 174);
     
     for i in 1..=20 {
         //let ring_texname = format!("ring_{:02}.png", i);
@@ -226,7 +251,9 @@ fn setup(
         material: materials.add(Color::rgb_u8(255, 144, 10)),        
         transform: Transform::from_xyz(5.0, 0.5, 5.0),
         ..default()
-    }, GameCursor { ndx : 0, drag_from : None, drag_dest : None, cursor_world : Vec3::ZERO } )).id();
+    }, GameCursor { ndx : 0, 
+        drag_from : None, drag_dest : None, cursor_world : Vec3::ZERO, split_pct : 0.5,
+        } )).id();
     
     // light
     commands.spawn(PointLightBundle {
@@ -238,7 +265,7 @@ fn setup(
             shadows_enabled: true,
             ..default()
         },
-        transform: Transform::from_xyz(-4.0, 8.0, 1.0),
+        transform: Transform::from_xyz(-4.0, 10.0, 1.0),
         ..default()
     });
 
@@ -270,6 +297,59 @@ fn setup(
             BloomSettings::NATURAL,
             GameCamera
         ));
+
+        commands.spawn((
+            TextBundle::from_section(
+                "Hello CyberSummoner\n\
+                Instructions go here",
+                TextStyle {
+                    font_size: 20.,                    
+                    ..default()
+                },
+            )
+            .with_style(Style {
+                position_type: PositionType::Absolute,
+                top: Val::Px(12.0),
+                left: Val::Px(12.0),                
+                ..default()
+            }),
+            PlayerHelp,
+        ));
+        
+
+        commands.spawn((
+            TextBundle::from_section("00",
+                TextStyle {
+                    font_size: 30.,                    
+                    ..default()
+                },
+            )
+            .with_style( Style {
+                position_type: PositionType::Absolute,
+                top: Val::Px(12.0),
+                left: Val::Px(12.0),                
+                ..default()
+            }),
+            SplitLabel { is_dest : true },
+        ));
+
+        commands.spawn((
+            TextBundle::from_section("00",
+                TextStyle {
+                    font_size: 30.,                    
+                    ..default()
+                },
+            )
+            .with_style( Style {
+                position_type: PositionType::Absolute,
+                top: Val::Px(12.0),
+                left: Val::Px(12.0),                
+                ..default()
+            }),
+            SplitLabel { is_dest : false },
+        ));
+
+
 
     // 2D scene -------------------------------
     commands.spawn(Camera2dBundle { 
@@ -305,6 +385,14 @@ fn setup(
     //     texture: asset_server.load("bevy_bird_dark.png"),
     //     ..default()
     // });
+
+
+    // setup player status
+    stuff.player_stuff[0].ptype = PlayerType::Local;
+    stuff.player_stuff[1].ptype = PlayerType::AI;
+    stuff.player_stuff[2].ptype = PlayerType::Local;
+    stuff.player_stuff[3].ptype = PlayerType::Local;
+
 }
 
 // fn spawn_cards ( 
@@ -370,8 +458,10 @@ fn handle_input(
     maptile_query: Query<(Entity, &GlobalTransform, &MapSpaceVisual), With<MapSpaceVisual>>,
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     windows: Query<&Window>,    
+    stuff: Res<GoodStuff>,
     mut game: ResMut<GameState>,
     mut ev_gamestate: EventWriter<GameStateChanged>,
+    mut ev_turn: EventWriter<TurnAdvance>,
     mut gizmos: Gizmos,
 ) {
     let (camera, camera_transform) = camera_query.single();
@@ -424,46 +514,35 @@ fn handle_input(
         cursor_transform.translation = pos;
         cursor_transform.rotation = rot;
         cursor_transform.scale = scale;
-
-        //if (ndx != cursor_info.ndx) {
-
-        // {
-        //     let verbose = (ndx != cursor_info.ndx);
-        //     let ndx = ndx as i32;
-        //     if (verbose) {
-        //         println!("Map Index: {}", ndx );
-        //     }
-
-        //     // look at the hovered square
-        //     if ((ndx >= 0) && (ndx < 100)) {
-        //         let mapsq = game.map.spaces[ ndx as usize ];
-                
-        //         // TODO: player check
-        //         if (mapsq.contents == MapSpaceContents::Playable) && (mapsq.power > 1) {
-        //             draw_map_dir( &mut gizmos, &game, ndx, MapDirection::North, verbose);
-        //             draw_map_dir( &mut gizmos, &game, ndx, MapDirection::NorthEast, verbose );
-        //             draw_map_dir( &mut gizmos, &game, ndx, MapDirection::SouthEast, verbose);
-        //             draw_map_dir( &mut gizmos, &game, ndx, MapDirection::South, verbose);
-        //             draw_map_dir( &mut gizmos, &game, ndx, MapDirection::SouthWest, verbose);
-        //             draw_map_dir( &mut gizmos, &game, ndx, MapDirection::NorthWest, verbose );            
-        //         }
-        //     }
-        // }
         
         cursor_info.ndx = ndx;        
-        cursor_info.cursor_world = point;
+        cursor_info.cursor_world = point;        
+        
+        let active_player = game.player_turn;
+
+        // Figure out split amount based on distance
+        if (cursor_info.drag_from.is_some()) {
+                
+            let drag_from_ndx = cursor_info.drag_from.unwrap() as i32;
+            let drag_from_pos = worldpos_from_mapindex(drag_from_ndx as i32);        
+            let d = cursor_info.cursor_world.distance( drag_from_pos );
+            let dnorm = ((d - 1.0).max(0.0) / 3.0).min( 1.0);
+
+            //println!("Dist is {}, {}", d, dnorm );
+            cursor_info.split_pct = dnorm;
+        }
 
         if (mouse_button_input.just_pressed(MouseButton::Left)) {
 
             // Make sure there is some power to drag from
-            if (ndx >=0) && (ndx != INVALID) && (game.map.spaces[ ndx ].power > 1 ) {            
+            if (ndx >=0) && (ndx != INVALID) && (game.map.spaces[ ndx ].power > 1 ) && (game.map.spaces[ ndx ].player == (active_player + 1) as u8 ) {            
                 cursor_info.drag_from = Some( ndx );
                 println!("Drag from: {}", ndx );
             }
         }
         
         if (mouse_button_input.just_released(MouseButton::Left)) {
-            println!("TODO split" );            
+            
             if (cursor_info.drag_from.is_some()) {
                 
                 let drag_from_ndx = cursor_info.drag_from.unwrap() as i32;
@@ -475,17 +554,40 @@ fn handle_input(
                 {
                     let found_ndx = found as usize;
                     if (game.map.spaces[ found_ndx ].player == 0) {
-                        game.map.spaces[ found_ndx ].player = 1;
-                        game.map.spaces[ found_ndx ].power = 1;                        
-                        ev_gamestate.send( GameStateChanged::CircleAdded( found_ndx as i32) );
 
-                        game.map.spaces[ drag_from_ndx as usize].power -= 1;
-                        ev_gamestate.send( GameStateChanged::CircleAdded( drag_from_ndx) );
-                    }
-            
-                    
+                        let src_pow = game.map.spaces[ drag_from_ndx as usize ].power as i32;
+                        let split_count = calc_split(cursor_info.split_pct, src_pow);
+                        if (split_count > 0) {                        
+                            game.map.spaces[ found_ndx ].player = (active_player + 1) as u8;
+                            game.map.spaces[ found_ndx ].power = split_count as u8;
+                            ev_gamestate.send( GameStateChanged::CircleAdded( found_ndx as i32) );
+
+                            game.map.spaces[ drag_from_ndx as usize].power -= split_count as u8;
+                            ev_gamestate.send( GameStateChanged::CircleAdded( drag_from_ndx) );
+
+
+                            // Advance to the next player's turn
+                            let mut pnum = game.player_turn;
+                            loop {
+                                pnum = pnum + 1;
+                                if (pnum >= stuff.player_stuff.len() as i32) {
+                                    pnum = 0;
+                                }
+
+                                if (stuff.player_stuff[pnum as usize].ptype != PlayerType::NotActive) {
+                                    break;
+                                }
+
+                                if (pnum == game.player_turn) {
+                                    println!("Didn't find any active players?");
+                                    break;
+                                }
+                            }
+                            game.player_turn = pnum;
+                            ev_turn.send( TurnAdvance(pnum) );
+                        }
+                    }            
                 }
-
             }
         }
 
@@ -498,7 +600,7 @@ fn handle_input(
     }
 }
 
-fn draw_map_dir( gizmos: &mut Gizmos, game : &GameState, ndx : i32, dir : MapDirection, verbose : bool )
+fn draw_map_dir( gizmos: &mut Gizmos, game : &GameState, ndx : i32, dir : MapDirection, color : Color, verbose : bool ) -> Vec3
 {    
     let found = game.map.search_dir( ndx,  dir );
     if (verbose) {
@@ -509,12 +611,18 @@ fn draw_map_dir( gizmos: &mut Gizmos, game : &GameState, ndx : i32, dir : MapDir
     if (found != ndx) && (found != gamestate::INVALID as i32) {
         let pos_a = worldpos_from_mapindex(ndx) + Vec3::Y * 0.25;
         let pos_b = worldpos_from_mapindex(found) + Vec3::Y * 0.25;
-        gizmos.line(pos_a, pos_b, Color::ORANGE );
+        gizmos.line(pos_a, pos_b, color );
         gizmos.cuboid( 
             Transform::from_translation(pos_b), //.with_scale(Vec3::splat(1.25)),
-            Color::ORANGE );
+            color );
+        
+        // Return the found pos
+        pos_b
 
+    } else {
+        Vec3::ZERO
     }
+
 
 }
 
@@ -541,6 +649,9 @@ fn mapdir_from_drag( pos : Vec3, start_pos : Vec3 ) -> MapDirection
 
 fn draw_split_feedback(
     cursor_q: Query<(&Transform, &GameCursor)>,    
+    camera_q: Query<(&Camera, &Transform, &GlobalTransform), With<GameCamera>>,
+    mut label_q: Query<(&SplitLabel, &mut Style, &mut Text)>,    
+    stuff: Res<GoodStuff>,
     game: Res<GameState>,
     mut gizmos: Gizmos,
 )
@@ -548,6 +659,7 @@ fn draw_split_feedback(
     let offs = Vec3 { x : 0.0, y : 0.15, z : 0.0 };
 
     let (cursor_transform, cursor_info) = cursor_q.single();
+    let player_col = stuff.player_stuff[ game.player_turn as usize].color;
 
     if cursor_info.drag_from.is_some() {
         // Draw a gizmo for drag_from
@@ -557,7 +669,32 @@ fn draw_split_feedback(
 
         // cursor_info.cursor_world - drag_from_pos;
         let mapdir = mapdir_from_drag( cursor_info.cursor_world, drag_from_pos );        
-        draw_map_dir( &mut gizmos, &game, drag_from_ndx as i32, mapdir, false);
+        let dst_pos = draw_map_dir( &mut gizmos, &game, drag_from_ndx as i32, mapdir, player_col, false);
+
+        let src_pow = game.map.spaces[ drag_from_ndx ].power as i32;
+        let split_count = calc_split(cursor_info.split_pct, src_pow);
+
+        for (lblinfo, mut style, mut label) in &mut label_q {
+            
+            let mut wpos;                        
+            if (lblinfo.is_dest) {
+                label.sections[0].value = format!("{}", split_count );
+                wpos = dst_pos;
+            } else {            
+                label.sections[0].value = format!("{}", src_pow - split_count );
+                wpos = drag_from_pos;
+            }
+            label.sections[0].style.color = player_col;
+            
+            let (camera, camera_transform, camera_global_transform) = camera_q.single();
+            let viewport_position = camera
+                .world_to_viewport(camera_global_transform, wpos)
+                .unwrap();
+
+            style.top = Val::Px(viewport_position.y);
+            style.left = Val::Px(viewport_position.x);
+
+        }
 
         // println!( "Drag angle: {} degrees dir {:?}", angle_degrees, mapdir );
     } else {
@@ -569,18 +706,24 @@ fn draw_split_feedback(
             let mapsq = game.map.spaces[ ndx as usize ];
             
             // TODO: player check
-            if (mapsq.contents == MapSpaceContents::Playable) && (mapsq.power > 1) {
-                draw_map_dir( &mut gizmos, &game, ndx, MapDirection::North, false);
-                draw_map_dir( &mut gizmos, &game, ndx, MapDirection::NorthEast, false );
-                draw_map_dir( &mut gizmos, &game, ndx, MapDirection::SouthEast, false);
-                draw_map_dir( &mut gizmos, &game, ndx, MapDirection::South, false);
-                draw_map_dir( &mut gizmos, &game, ndx, MapDirection::SouthWest, false);
-                draw_map_dir( &mut gizmos, &game, ndx, MapDirection::NorthWest, false );            
+            if (mapsq.contents == MapSpaceContents::Playable) && (mapsq.power > 1) && (mapsq.player == (game.player_turn + 1) as u8) {                
+                draw_map_dir( &mut gizmos, &game, ndx, MapDirection::North, player_col, false);
+                draw_map_dir( &mut gizmos, &game, ndx, MapDirection::NorthEast,player_col,  false );
+                draw_map_dir( &mut gizmos, &game, ndx, MapDirection::SouthEast,player_col,  false);
+                draw_map_dir( &mut gizmos, &game, ndx, MapDirection::South, player_col, false);
+                draw_map_dir( &mut gizmos, &game, ndx, MapDirection::SouthWest,player_col,  false);
+                draw_map_dir( &mut gizmos, &game, ndx, MapDirection::NorthWest, player_col, false );            
             }
         }
         
     }
             
+}
+
+fn calc_split( split_pct : f32, src_pow: i32) -> i32 {
+    let split_count = split_pct * ((src_pow - 1) as f32);
+    let split_count = (split_count as i32);
+    split_count
 }
 
 
@@ -610,14 +753,17 @@ fn worldpos_from_mapindex( mapindex : i32 ) -> Vec3
 
 fn build_map (
     asset_server: Res<AssetServer>,
+    stuff: Res<GoodStuff>,
     mut commands: Commands,
     mut gamestate: ResMut<GameState>,
     mut meshes: ResMut<Assets<Mesh>>,    
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut ev_gamestate: EventWriter<GameStateChanged>,
+    mut ev_turn: EventWriter<TurnAdvance>,
 ) 
 {
     println!("Hello from build_map.");
+
     
     // First, set up the map indices and build the map
     let mut rng = rand::thread_rng();
@@ -635,16 +781,40 @@ fn build_map (
             } else {
                 map_space.contents = MapSpaceContents::Playable;
 
-                if rng.gen_ratio(1, 4) {
-                    map_space.player = rng.gen_range(1..=4);
-                    map_space.power = rng.gen_range(1..=20);
+                // if rng.gen_ratio(1, 4) {
+                //     map_space.player = rng.gen_range(1..=4);
+                //     map_space.power = rng.gen_range(1..=20);
     
-                    // send a gamestate change to mark the init
-                    ev_gamestate.send( GameStateChanged::CircleAdded( map_space.ndx ) );
-                }
+                //     // send a gamestate change to mark the init
+                //     ev_gamestate.send( GameStateChanged::CircleAdded( map_space.ndx ) );
+                // }
             }            
         }
     }
+
+    // Find starting spaces
+    let mut edge_spaces = Vec::new();
+    for map_space in &gamestate.map {
+        
+        // TODO also check that it's on the "edge" of the map, or assign this
+        // when generating
+        if map_space.contents == MapSpaceContents::Playable {
+            edge_spaces.push( map_space.ndx );
+        }
+    }
+
+    for i in 0..stuff.player_stuff.len() {
+        if stuff.player_stuff[i].ptype != PlayerType::NotActive {
+            let random_index = rng.gen_range(0..edge_spaces.len());
+            let selected_index = edge_spaces.remove(random_index) as usize;
+
+            gamestate.map.spaces[ selected_index ].player = (i+1) as u8;
+            gamestate.map.spaces[ selected_index ].power = 16;
+
+            ev_gamestate.send( GameStateChanged::CircleAdded( selected_index as i32 ) );
+        }
+    }
+
 
     // Now build the map visuals based on the map data
     let hex_scene = asset_server.load("hexagon.glb#Scene0");
@@ -680,7 +850,30 @@ fn build_map (
 
     println!("Map size {}", gamestate.map_visuals.len());    
 
+    // Send a turn advance to update the player prompt
+    ev_turn.send( TurnAdvance(gamestate.player_turn) );
+
 }
+
+fn player_guidance( 
+    //mut commands: Commands,
+    stuff: Res<GoodStuff>,
+    game: Res<GameState>,
+    //mut helper_q: Query<(&mut Text, &mut Style), With<PlayerHelp>>,        
+    mut helper_q: Query<&mut Text, With<PlayerHelp>>,        
+    mut ev_turn: EventReader<TurnAdvance>, ) 
+{
+    for ev in ev_turn.read() {
+
+        let prompt = format!("It is now player {} turn", ev.0 );
+        let mut text = helper_q.single_mut();
+        let pinfo = &stuff.player_stuff[ev.0 as usize];
+        //text.style.color = pinfo.color;
+        text.sections[0].style.color = pinfo.color;
+        text.sections[0].value = prompt;
+    }
+}
+
 
 fn on_gamestate_changed( 
     mut commands: Commands,
