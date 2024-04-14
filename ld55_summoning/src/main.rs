@@ -74,6 +74,7 @@ struct GameCursor {
     drag_dest : Option<usize>,
 }
 
+
 #[derive(Component)]
 struct MapSpaceVisual 
 {
@@ -303,8 +304,7 @@ fn test_rings (
     if keyboard_input.just_pressed( KeyCode::KeyW ) {
         println!("W pressed");
 
-        let (xform, cursor_info) = cursor_q.single();
-        //zzzz        
+        let (xform, cursor_info) = cursor_q.single();        
         if (gamestate.map.spaces[ cursor_info.ndx ].player == 0) {
             gamestate.map.spaces[ cursor_info.ndx ].player = 1;            
         }
@@ -333,8 +333,9 @@ fn handle_input(
     mut cursor_q: Query<(&mut Transform, &mut GameCursor)>,
     maptile_query: Query<(Entity, &GlobalTransform, &MapSpaceVisual), With<MapSpaceVisual>>,
     mouse_button_input: Res<ButtonInput<MouseButton>>,
-    windows: Query<&Window>,
-    game: Res<GameState>,
+    windows: Query<&Window>,    
+    mut game: ResMut<GameState>,
+    mut ev_gamestate: EventWriter<GameStateChanged>,
     mut gizmos: Gizmos,
 ) {
     let (camera, camera_transform) = camera_query.single();
@@ -390,28 +391,28 @@ fn handle_input(
 
         //if (ndx != cursor_info.ndx) {
 
-        {
-            let verbose = (ndx != cursor_info.ndx);
-            let ndx = ndx as i32;
-            if (verbose) {
-                println!("Map Index: {}", ndx );
-            }
+        // {
+        //     let verbose = (ndx != cursor_info.ndx);
+        //     let ndx = ndx as i32;
+        //     if (verbose) {
+        //         println!("Map Index: {}", ndx );
+        //     }
 
-            // look at the hovered square
-            if ((ndx >= 0) && (ndx < 100)) {
-                let mapsq = game.map.spaces[ ndx as usize ];
+        //     // look at the hovered square
+        //     if ((ndx >= 0) && (ndx < 100)) {
+        //         let mapsq = game.map.spaces[ ndx as usize ];
                 
-                // TODO: player check
-                if (mapsq.contents == MapSpaceContents::Playable) && (mapsq.power > 1) {
-                    dbg_map_dir( &mut gizmos, &game, ndx, MapDirection::North, verbose);
-                    dbg_map_dir( &mut gizmos, &game, ndx, MapDirection::NorthEast, verbose );
-                    dbg_map_dir( &mut gizmos, &game, ndx, MapDirection::SouthEast, verbose);
-                    dbg_map_dir( &mut gizmos, &game, ndx, MapDirection::South, verbose);
-                    dbg_map_dir( &mut gizmos, &game, ndx, MapDirection::SouthWest, verbose);
-                    dbg_map_dir( &mut gizmos, &game, ndx, MapDirection::NorthWest, verbose );            
-                }
-            }
-        }
+        //         // TODO: player check
+        //         if (mapsq.contents == MapSpaceContents::Playable) && (mapsq.power > 1) {
+        //             draw_map_dir( &mut gizmos, &game, ndx, MapDirection::North, verbose);
+        //             draw_map_dir( &mut gizmos, &game, ndx, MapDirection::NorthEast, verbose );
+        //             draw_map_dir( &mut gizmos, &game, ndx, MapDirection::SouthEast, verbose);
+        //             draw_map_dir( &mut gizmos, &game, ndx, MapDirection::South, verbose);
+        //             draw_map_dir( &mut gizmos, &game, ndx, MapDirection::SouthWest, verbose);
+        //             draw_map_dir( &mut gizmos, &game, ndx, MapDirection::NorthWest, verbose );            
+        //         }
+        //     }
+        // }
         
         cursor_info.ndx = ndx;        
         cursor_info.cursor_world = point;
@@ -420,17 +421,44 @@ fn handle_input(
             cursor_info.drag_from = Some( ndx );
             println!("Drag from: {}", ndx );
         }
+        
+        if (mouse_button_input.just_released(MouseButton::Left)) {
+            println!("TODO split" );            
+            if (cursor_info.drag_from.is_some()) {
+                
+                let drag_from_ndx = cursor_info.drag_from.unwrap() as i32;
+                let drag_from_pos = worldpos_from_mapindex(drag_from_ndx as i32);        
+
+                let mapdir = mapdir_from_drag( cursor_info.cursor_world, drag_from_pos );
+                let found = game.map.search_dir( drag_from_ndx,  mapdir );
+                if (found != drag_from_ndx) && (found != gamestate::INVALID as i32) 
+                {
+                    let found_ndx = found as usize;
+                    if (game.map.spaces[ found_ndx ].player == 0) {
+                        game.map.spaces[ found_ndx ].player = 1;
+                        game.map.spaces[ found_ndx ].power = 1;                        
+                        ev_gamestate.send( GameStateChanged::CircleAdded( found_ndx as i32) );
+
+                        game.map.spaces[ drag_from_ndx as usize].power -= 1;
+                        ev_gamestate.send( GameStateChanged::CircleAdded( drag_from_ndx) );
+                    }
+            
+                    
+                }
+
+            }
+        }
 
         if (!mouse_button_input.pressed(MouseButton::Left)) {
             if (cursor_info.drag_from.is_some()) {
                 println!("Drag clear" );
             }
             cursor_info.drag_from = None;            
-        }        
+        }
     }
 }
 
-fn dbg_map_dir( gizmos: &mut Gizmos, game : &GameState, ndx : i32, dir : MapDirection, verbose : bool )
+fn draw_map_dir( gizmos: &mut Gizmos, game : &GameState, ndx : i32, dir : MapDirection, verbose : bool )
 {    
     let found = game.map.search_dir( ndx,  dir );
     if (verbose) {
@@ -450,8 +478,30 @@ fn dbg_map_dir( gizmos: &mut Gizmos, game : &GameState, ndx : i32, dir : MapDire
 
 }
 
+fn mapdir_from_drag( pos : Vec3, start_pos : Vec3 ) -> MapDirection
+{
+    // get best angle from arrow
+    let dir = pos - start_pos;
+    let angle = dir.z.atan2(dir.x);
+    let mut angle_degrees = angle.to_degrees() + (90.0 + 30.0);
+    if (angle_degrees < 0.0) {
+        angle_degrees = angle_degrees + 360.0;
+    }
+    
+    match (angle_degrees / 60.0).floor() as i32 {
+        0 => MapDirection::North,
+        1 => MapDirection::NorthEast,
+        2 => MapDirection::SouthEast,
+        3 => MapDirection::South,
+        4 => MapDirection::SouthWest,
+        5 => MapDirection::NorthWest,
+        _ => MapDirection::North, // Default case
+    }
+}
+
 fn draw_split_feedback(
     cursor_q: Query<(&Transform, &GameCursor)>,    
+    game: Res<GameState>,
     mut gizmos: Gizmos,
 )
 {
@@ -465,26 +515,30 @@ fn draw_split_feedback(
         let drag_from_pos = worldpos_from_mapindex(drag_from_ndx as i32);        
         gizmos.arrow( drag_from_pos + offs, cursor_info.cursor_world + offs, Color::YELLOW );
 
-        // get best angle from arrow
-        let dir = cursor_info.cursor_world - drag_from_pos;
-        let angle = dir.z.atan2(dir.x);
-        let mut angle_degrees = angle.to_degrees() + (90.0 + 30.0);
-        if (angle_degrees < 0.0) {
-            angle_degrees = angle_degrees + 360.0;
-        }
+        // cursor_info.cursor_world - drag_from_pos;
+        let mapdir = mapdir_from_drag( cursor_info.cursor_world, drag_from_pos );        
+        draw_map_dir( &mut gizmos, &game, drag_from_ndx as i32, mapdir, false);
 
-        // TODO: move to map
-        let mapdir = match (angle_degrees / 60.0).floor() as i32 {
-            0 => MapDirection::North,
-            1 => MapDirection::NorthEast,
-            2 => MapDirection::SouthEast,
-            3 => MapDirection::South,
-            4 => MapDirection::SouthWest,
-            5 => MapDirection::NorthWest,
-            _ => MapDirection::North, // Default case
-        };
+        // println!( "Drag angle: {} degrees dir {:?}", angle_degrees, mapdir );
+    } else {
+        // not dragging, should we show preview?                
+        let ndx = cursor_info.ndx as i32;        
+
+        // look at the hovered square
+        if ((ndx >= 0) && (ndx < 100)) {
+            let mapsq = game.map.spaces[ ndx as usize ];
+            
+            // TODO: player check
+            if (mapsq.contents == MapSpaceContents::Playable) && (mapsq.power > 1) {
+                draw_map_dir( &mut gizmos, &game, ndx, MapDirection::North, false);
+                draw_map_dir( &mut gizmos, &game, ndx, MapDirection::NorthEast, false );
+                draw_map_dir( &mut gizmos, &game, ndx, MapDirection::SouthEast, false);
+                draw_map_dir( &mut gizmos, &game, ndx, MapDirection::South, false);
+                draw_map_dir( &mut gizmos, &game, ndx, MapDirection::SouthWest, false);
+                draw_map_dir( &mut gizmos, &game, ndx, MapDirection::NorthWest, false );            
+            }
+        }
         
-        println!( "Drag angle: {} degrees dir {:?}", angle_degrees, mapdir );
     }
             
 }
@@ -619,13 +673,14 @@ fn on_gamestate_changed(
                 }
 
                 //commands.entity(ent_vis).
+                let ring_sz = if spc.power == 1 { 0.9 } else { 1.25 };
 
                 let ent_ring = commands.spawn((PbrBundle {            
                     mesh: stuff.ring_mesh.clone(),
                     material: stuff.ring_mtl[ (spc.power as usize) - 1 ].clone(),
                     transform: Transform {
                         translation : Vec3 { x: 0.0, y : 0.2, z : 0.0 },
-                        scale: Vec3::splat( 1.2 ),
+                        scale: Vec3::splat( ring_sz ),
                         ..default()
                     },
                     //transform: Transform::from_scale(Vec3::new(10.0, 10.0, 10.0)),
