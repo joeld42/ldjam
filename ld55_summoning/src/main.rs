@@ -17,7 +17,7 @@ use rand::Rng;
 
 use std::f32::consts::PI;
 
-use crate::gamestate::GameMap;
+use crate::gamestate::{GameMap, MapDirection, INVALID};
 use crate::gamestate::MapSpaceContents;
 pub mod gamestate;
 
@@ -123,9 +123,16 @@ fn setup(
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     //mut cards: ResMut<CardDeck>,
     mut stuff: ResMut<GoodStuff>,
+    mut config_store: ResMut<GizmoConfigStore>,
     mut gamestate: ResMut<GameState>,
     asset_server: Res<AssetServer>
 ) {
+
+
+    // set up gizmos
+    let (config, _) = config_store.config_mut::<DefaultGizmoConfigGroup>();
+    config.line_width *= 2.0;
+
     // circular base
     let mut plane_mesh = Mesh::from( Plane3d { normal: Direction3d::Y } )
                     .with_generated_tangents().unwrap();
@@ -327,7 +334,7 @@ fn handle_input(
     maptile_query: Query<(Entity, &GlobalTransform, &MapSpaceVisual), With<MapSpaceVisual>>,
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     windows: Query<&Window>,
-    //mut gamestate: ResMut<GameState>,
+    game: Res<GameState>,
     mut gizmos: Gizmos,
 ) {
     let (camera, camera_transform) = camera_query.single();
@@ -380,6 +387,31 @@ fn handle_input(
         cursor_transform.translation = pos;
         cursor_transform.rotation = rot;
         cursor_transform.scale = scale;
+
+        //if (ndx != cursor_info.ndx) {
+
+        {
+            let verbose = (ndx != cursor_info.ndx);
+            let ndx = ndx as i32;
+            if (verbose) {
+                println!("Map Index: {}", ndx );
+            }
+
+            // look at the hovered square
+            if ((ndx >= 0) && (ndx < 100)) {
+                let mapsq = game.map.spaces[ ndx as usize ];
+                
+                // TODO: player check
+                if (mapsq.contents == MapSpaceContents::Playable) && (mapsq.power > 1) {
+                    dbg_map_dir( &mut gizmos, &game, ndx, MapDirection::North, verbose);
+                    dbg_map_dir( &mut gizmos, &game, ndx, MapDirection::NorthEast, verbose );
+                    dbg_map_dir( &mut gizmos, &game, ndx, MapDirection::SouthEast, verbose);
+                    dbg_map_dir( &mut gizmos, &game, ndx, MapDirection::South, verbose);
+                    dbg_map_dir( &mut gizmos, &game, ndx, MapDirection::SouthWest, verbose);
+                    dbg_map_dir( &mut gizmos, &game, ndx, MapDirection::NorthWest, verbose );            
+                }
+            }
+        }
         
         cursor_info.ndx = ndx;        
         cursor_info.cursor_world = point;
@@ -389,18 +421,33 @@ fn handle_input(
             println!("Drag from: {}", ndx );
         }
 
-
         if (!mouse_button_input.pressed(MouseButton::Left)) {
             if (cursor_info.drag_from.is_some()) {
                 println!("Drag clear" );
             }
             cursor_info.drag_from = None;            
-        }
-
-        if (ndx != cursor_info.ndx) {
-            println!("Map Index: {}", ndx );
-        }
+        }        
     }
+}
+
+fn dbg_map_dir( gizmos: &mut Gizmos, game : &GameState, ndx : i32, dir : MapDirection, verbose : bool )
+{    
+    let found = game.map.search_dir( ndx,  dir );
+    if (verbose) {
+        let dir_str = format!("{:?}", dir);
+        let dir_str_padded = format!("{:<10}", dir_str);                    
+        println!("   {} {} Open {}", dir_str_padded, gamestate::move_dir( ndx, dir ),  found );    
+    }
+    if (found != ndx) && (found != gamestate::INVALID as i32) {
+        let pos_a = worldpos_from_mapindex(ndx) + Vec3::Y * 0.25;
+        let pos_b = worldpos_from_mapindex(found) + Vec3::Y * 0.25;
+        gizmos.line(pos_a, pos_b, Color::ORANGE );
+        gizmos.cuboid( 
+            Transform::from_translation(pos_b), //.with_scale(Vec3::splat(1.25)),
+            Color::ORANGE );
+
+    }
+
 }
 
 fn draw_split_feedback(
@@ -417,6 +464,27 @@ fn draw_split_feedback(
         let drag_from_ndx = cursor_info.drag_from.unwrap();
         let drag_from_pos = worldpos_from_mapindex(drag_from_ndx as i32);        
         gizmos.arrow( drag_from_pos + offs, cursor_info.cursor_world + offs, Color::YELLOW );
+
+        // get best angle from arrow
+        let dir = cursor_info.cursor_world - drag_from_pos;
+        let angle = dir.z.atan2(dir.x);
+        let mut angle_degrees = angle.to_degrees() + (90.0 + 30.0);
+        if (angle_degrees < 0.0) {
+            angle_degrees = angle_degrees + 360.0;
+        }
+
+        // TODO: move to map
+        let mapdir = match (angle_degrees / 60.0).floor() as i32 {
+            0 => MapDirection::North,
+            1 => MapDirection::NorthEast,
+            2 => MapDirection::SouthEast,
+            3 => MapDirection::South,
+            4 => MapDirection::SouthWest,
+            5 => MapDirection::NorthWest,
+            _ => MapDirection::North, // Default case
+        };
+        
+        println!( "Drag angle: {} degrees dir {:?}", angle_degrees, mapdir );
     }
             
 }
