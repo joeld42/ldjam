@@ -8,8 +8,7 @@ use bevy::{
     },
     pbr::NotShadowCaster,
     prelude::*,    
-    render::mesh::VertexAttributeValues,
-    render::texture::{ImageAddressMode, ImageSamplerDescriptor},
+    render::{color, mesh::VertexAttributeValues, texture::{ImageAddressMode, ImageSamplerDescriptor}},
 
 };
 
@@ -31,11 +30,19 @@ struct CardDeck {
     // todo: card stats, etc 
 }
 
+#[derive(Default)]
+struct PlayerStuff
+{
+    color: Color,
+    color2 : Color,
+    ring_mtl: [ Handle<StandardMaterial>; 21 ],
+}
+
 // Resource  stuff
 #[derive(Resource,Default)]
 struct GoodStuff {
     ring_mesh: Handle<Mesh>,
-    ring_mtl: [ Handle<StandardMaterial>; 16 ],
+    player_stuff : [ PlayerStuff ; 4],
 }
 
 
@@ -175,17 +182,42 @@ fn setup(
     let ring_mesh = Mesh::from( Plane3d { normal: Direction3d::Y } ).with_generated_tangents().unwrap();
     stuff.ring_mesh = meshes.add( ring_mesh );
 
-    for i in 1..=16 {
-        let ring_texname = format!("ring_{:02}.png", i);
-        let ring_mtl = StandardMaterial {
-            base_color: Color::ORANGE,
-            base_color_texture: Some(asset_server.load(ring_texname.clone())),
-            emissive: Color::ORANGE * 200.0,
-            emissive_texture: Some(asset_server.load(ring_texname.clone())),
-            alpha_mode: AlphaMode::Blend,
-            ..default()
-        };
-        stuff.ring_mtl[i - 1] = materials.add(ring_mtl);
+    stuff.player_stuff[0].color  = Color::rgb_u8(255, 113, 206);
+    stuff.player_stuff[0].color2 = Color::rgb_u8(161, 45, 172 );
+
+    stuff.player_stuff[1].color  = Color::rgb_u8(185, 103, 255);
+    stuff.player_stuff[1].color2 = Color::rgb_u8(52, 37, 174);
+
+    stuff.player_stuff[2].color  = Color::rgb_u8(1, 205, 254);
+    stuff.player_stuff[2].color2 = Color::rgb_u8(1, 150, 114);
+
+    stuff.player_stuff[3].color  = Color::rgb_u8(5, 254, 161);
+    stuff.player_stuff[3].color2 = Color::rgb_u8(1, 152, 30);
+    
+    for i in 1..=20 {
+        //let ring_texname = format!("ring_{:02}.png", i);
+        let ring_texname = format!("tx_rings/RingGen_{:02}_BaseColor.PNG", i );
+        let ring_emit_texname = format!("tx_rings/RingGen_{:02}_Emissive.PNG", i );
+
+        for p in 0..4 {
+
+            let mut color_main = stuff.player_stuff[p].color * 200.0;
+            color_main.set_a(1.0);
+
+            let mut color_support = stuff.player_stuff[p].color * 1.5;
+            color_support.set_a( 1.0 );
+
+            let ring_mtl = StandardMaterial {
+                base_color: color_support,
+                base_color_texture: Some(asset_server.load(ring_texname.clone())),
+                emissive: color_main,
+                emissive_texture: Some(asset_server.load(ring_emit_texname.clone())),
+                alpha_mode: AlphaMode::Blend,
+                ..default()
+            };
+            
+            stuff.player_stuff[p].ring_mtl[i - 1] = materials.add(ring_mtl);
+        }
     }
         
     // cursor cube
@@ -200,7 +232,9 @@ fn setup(
     commands.spawn(PointLightBundle {
         point_light: PointLight {
             color : Color::rgb_u8( 75, 187, 235 ),
-            intensity: 20_000_000.0,
+            //color : Color::WHITE,
+            intensity: 5_000_000.0,
+            //intensity: 1.0,
             shadows_enabled: true,
             ..default()
         },
@@ -210,13 +244,15 @@ fn setup(
 
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
-            illuminance: 320.0,
-            color : Color::rgb_u8( 20, 187, 200 ),
+            illuminance: 1000.0,
+            //color : Color::rgb_u8( 200, 147, 50 ),
+            color : Color::rgb_u8( 180, 27, 77 ),
             //shadows_enabled: true,
             ..default()
         },
-        transform: Transform::from_xyz(0.0, 2.0, 0.0)
-            .with_rotation(Quat::from_rotation_x( -PI / 4.)),
+        transform: Transform::from_xyz(2.0, 10.0, 0.0)
+                .with_rotation(Quat::from_euler( EulerRot::XYZ, -PI / 4., -PI / 6., 0.0)),
+            //.with_rotation(Quat::from_rotation_x( -PI / 4.)),
         ..default()
     });
     
@@ -418,8 +454,12 @@ fn handle_input(
         cursor_info.cursor_world = point;
 
         if (mouse_button_input.just_pressed(MouseButton::Left)) {
-            cursor_info.drag_from = Some( ndx );
-            println!("Drag from: {}", ndx );
+
+            // Make sure there is some power to drag from
+            if (ndx >=0) && (ndx != INVALID) && (game.map.spaces[ ndx ].power > 1 ) {            
+                cursor_info.drag_from = Some( ndx );
+                println!("Drag from: {}", ndx );
+            }
         }
         
         if (mouse_button_input.just_released(MouseButton::Left)) {
@@ -596,8 +636,8 @@ fn build_map (
                 map_space.contents = MapSpaceContents::Playable;
 
                 if rng.gen_ratio(1, 4) {
-                    map_space.player = rng.gen_range(1..4);
-                    map_space.power = rng.gen_range(1..=4);
+                    map_space.player = rng.gen_range(1..=4);
+                    map_space.power = rng.gen_range(1..=20);
     
                     // send a gamestate change to mark the init
                     ev_gamestate.send( GameStateChanged::CircleAdded( map_space.ndx ) );
@@ -677,7 +717,7 @@ fn on_gamestate_changed(
 
                 let ent_ring = commands.spawn((PbrBundle {            
                     mesh: stuff.ring_mesh.clone(),
-                    material: stuff.ring_mtl[ (spc.power as usize) - 1 ].clone(),
+                    material: stuff.player_stuff[spc.player as usize - 1].ring_mtl[ (spc.power as usize) - 1 ].clone(),
                     transform: Transform {
                         translation : Vec3 { x: 0.0, y : 0.2, z : 0.0 },
                         scale: Vec3::splat( ring_sz ),
