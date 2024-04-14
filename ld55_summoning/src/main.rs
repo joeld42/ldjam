@@ -69,6 +69,9 @@ struct GameCamera;
 #[derive(Component)]
 struct GameCursor {
     ndx : usize,
+    cursor_world : Vec3,
+    drag_from : Option<usize>,
+    drag_dest : Option<usize>,
 }
 
 #[derive(Component)]
@@ -107,6 +110,7 @@ fn main() {
         .add_systems( Update, test_rings)
         .add_systems( Update, handle_input )
         .add_systems( Update, on_gamestate_changed )
+        .add_systems( Update, draw_split_feedback )
         .add_event::<GameStateChanged>()
         .run();
 }
@@ -182,7 +186,7 @@ fn setup(
         material: materials.add(Color::rgb_u8(255, 144, 10)),        
         transform: Transform::from_xyz(5.0, 0.5, 5.0),
         ..default()
-    }, GameCursor { ndx : 0 } )).id();
+    }, GameCursor { ndx : 0, drag_from : None, drag_dest : None, cursor_world : Vec3::ZERO } )).id();
     
     // light
     commands.spawn(PointLightBundle {
@@ -321,6 +325,7 @@ fn handle_input(
     ground_query: Query<&GlobalTransform, With<Ground>>,
     mut cursor_q: Query<(&mut Transform, &mut GameCursor)>,
     maptile_query: Query<(Entity, &GlobalTransform, &MapSpaceVisual), With<MapSpaceVisual>>,
+    mouse_button_input: Res<ButtonInput<MouseButton>>,
     windows: Query<&Window>,
     //mut gamestate: ResMut<GameState>,
     mut gizmos: Gizmos,
@@ -351,7 +356,7 @@ fn handle_input(
         0.2,
         Color::WHITE,
     );
-
+    
 
     // Find the closest map tile to the cursor
     let mut closest_tile: Option<(Entity, &GlobalTransform, f32, usize)> = None;    
@@ -369,20 +374,52 @@ fn handle_input(
     
     if let Some(( _closest_entity, tile_xform, _, ndx )) = closest_tile {        
 
-        let (mut cursor_transform, mut cursor_info) = cursor_q.single_mut();        
-        
+        let (mut cursor_transform, mut cursor_info) = cursor_q.single_mut();
+                
         let (scale, rot, pos) = tile_xform.to_scale_rotation_translation();
         cursor_transform.translation = pos;
         cursor_transform.rotation = rot;
         cursor_transform.scale = scale;
+        
+        cursor_info.ndx = ndx;        
+        cursor_info.cursor_world = point;
 
-        cursor_info.ndx = ndx;
+        if (mouse_button_input.just_pressed(MouseButton::Left)) {
+            cursor_info.drag_from = Some( ndx );
+            println!("Drag from: {}", ndx );
+        }
 
+
+        if (!mouse_button_input.pressed(MouseButton::Left)) {
+            if (cursor_info.drag_from.is_some()) {
+                println!("Drag clear" );
+            }
+            cursor_info.drag_from = None;            
+        }
+
+        if (ndx != cursor_info.ndx) {
+            println!("Map Index: {}", ndx );
+        }
     }
-
-
 }
 
+fn draw_split_feedback(
+    cursor_q: Query<(&Transform, &GameCursor)>,    
+    mut gizmos: Gizmos,
+)
+{
+    let offs = Vec3 { x : 0.0, y : 0.15, z : 0.0 };
+
+    let (cursor_transform, cursor_info) = cursor_q.single();
+
+    if cursor_info.drag_from.is_some() {
+        // Draw a gizmo for drag_from
+        let drag_from_ndx = cursor_info.drag_from.unwrap();
+        let drag_from_pos = worldpos_from_mapindex(drag_from_ndx as i32);        
+        gizmos.arrow( drag_from_pos + offs, cursor_info.cursor_world + offs, Color::YELLOW );
+    }
+            
+}
 
 
 fn worldpos_from_mapindex( mapindex : i32 ) -> Vec3
@@ -512,8 +549,6 @@ fn on_gamestate_changed(
                     }
                     None => {}
                 }
-
-
 
                 //commands.entity(ent_vis).
 

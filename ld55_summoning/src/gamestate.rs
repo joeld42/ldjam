@@ -6,12 +6,20 @@ pub enum MapSpaceContents {
     Playable,  // A square that can be played on
 }
 
+pub enum MapDirection {
+    North,
+    NorthEast,
+    NorthWest,
+    South,
+    SouthWest,
+    SouthEast
+}
+
 impl Default for MapSpaceContents {
     fn default() -> Self {
         MapSpaceContents::NotInMap
     }
 }
-
 
 
 #[derive(Copy, Clone, Default, Debug)]
@@ -29,6 +37,8 @@ pub struct GameMap {
 
 pub const MAP_SZ : usize = 10;
 
+
+
 impl Default for GameMap {
     fn default() -> GameMap {
         GameMap {
@@ -36,6 +46,7 @@ impl Default for GameMap {
         }
     }
 }
+
 
 impl<'a> IntoIterator for &'a GameMap {
     type Item = &'a MapSpace;
