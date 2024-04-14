@@ -24,7 +24,7 @@ pub struct MapSpace {
 
 #[derive(Copy, Clone, Debug)]
 pub struct GameMap {
-    spaces : [ MapSpace ; 100],
+    pub spaces : [ MapSpace ; 100],
 }
 
 pub const MAP_SZ : usize = 10;
