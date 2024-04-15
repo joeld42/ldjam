@@ -15,7 +15,9 @@ use bevy::{
 
 use gamestate::gen_valid_moves;
 use rand::Rng;
+use rand::seq::SliceRandom;
 
+use std::collections::HashSet;
 use std::{f32::consts::PI, time::Duration};
 
 use crate::gamestate::{GameSnapshot, MapDirection, INVALID};
@@ -762,52 +764,76 @@ fn build_map (
     mut ev_gamestate: EventWriter<GameStateChanged>,
     mut ev_turn: EventWriter<TurnAdvance>,
 ) 
-{
-    println!("Hello from build_map.");
+{    
+    // Count number of active players to get target size for map
+    let mut player_count = 0;
+    for i in 0..stuff.player_stuff.len() {
+        if stuff.player_stuff[i].ptype != PlayerType::NotActive {
+            player_count += 1;
+        }
+    }
 
-    
     // First, set up the map indices and build the map
     let mut rng = rand::thread_rng();
     let mut index = 0;
+    let mut space_count = 0;    
     for map_space in &mut gamestate.snapshot.map {
         map_space.ndx = index;
         index = index + 1;
 
         let hex_pos = worldpos_from_mapindex( map_space.ndx );
 
-        if hex_pos.length() < 100.0 {
-            //println!("Map includes hex {}, World Position: {:?} len {}", map_space.ndx, hex_pos, hex_pos.length());
+        // this trims the board and makes it more rounder
+        if hex_pos.length() < 8.0 {
+            
+            // todo: replace this with adding some obstacles with preset shapes
             if rng.gen_ratio(1, 8) {
                 map_space.contents = MapSpaceContents::Blocked;
             } else {
                 map_space.contents = MapSpaceContents::Playable;
-
-                // if rng.gen_ratio(1, 4) {
-                //     map_space.player = rng.gen_range(1..=4);
-                //     map_space.power = rng.gen_range(1..=20);
-    
-                //     // send a gamestate change to mark the init
-                //     ev_gamestate.send( GameStateChanged::CircleAdded( map_space.ndx ) );
-                // }
+                space_count += 1;                
             }            
         }
     }
-
-    // Find starting spaces
-    let mut edge_spaces = Vec::new();
-    for map_space in &gamestate.snapshot.map {
         
-        // TODO also check that it's on the "edge" of the map, or assign this
-        // when generating
-        if map_space.contents == MapSpaceContents::Playable {
-            edge_spaces.push( map_space.ndx );
+
+    println!("Hello from build_map, Players {} target spaces {} have {}.", 
+            player_count, player_count * 16, space_count );
+
+    let target_spaces = player_count * 16;
+    let mut attempts = 1000;
+    while space_count > target_spaces && attempts > 0{
+        // erode away the board edges
+        let edge_spaces = gamestate.snapshot.map.edge_spaces_corners();
+                
+        let random_index = rng.gen_range(0..edge_spaces.len());
+        let selected_index = edge_spaces[random_index];        
+        
+        // Try removing this space
+        let mut map_copy = gamestate.snapshot.map;
+        map_copy.spaces[selected_index as usize].contents = MapSpaceContents::NotInMap;
+
+        if map_copy.check_reachability() {    
+            //gamestate.snapshot.map.spaces[selected_index].contents = MapSpaceContents::NotInMap;
+            gamestate.snapshot.map = map_copy;
+            space_count -= 1;
         }
+
+        attempts -= 1;
+        println!("iter {} edge spaces now has {} entries space_count {}", attempts, edge_spaces.len(), space_count );
     }
 
+    if attempts == 0 {
+        println!("Warning! Failed to erode map.");
+    }
+
+    // Find starting spaces
+    let mut edge_spaces = gamestate.snapshot.map.edge_spaces();
+    edge_spaces.shuffle( &mut rng );
+
     for i in 0..stuff.player_stuff.len() {
-        if stuff.player_stuff[i].ptype != PlayerType::NotActive {
-            let random_index = rng.gen_range(0..edge_spaces.len());
-            let selected_index = edge_spaces.remove(random_index) as usize;
+        if stuff.player_stuff[i].ptype != PlayerType::NotActive {            
+            let selected_index = edge_spaces[i] as usize;
 
             gamestate.snapshot.map.spaces[ selected_index ].player = (i+1) as u8;
             gamestate.snapshot.map.spaces[ selected_index ].power = 16;
@@ -855,6 +881,7 @@ fn build_map (
     ev_turn.send( TurnAdvance(gamestate.player_turn) );
 
 }
+
 
 fn player_guidance( 
     //mut commands: Commands,

@@ -110,6 +110,108 @@ impl GameMap {
                  }
         }        
      }
+
+     pub fn neighbors( &self, ndx : i32, valid_only : bool ) -> Vec::<i32> {
+
+        let mut result = Vec::new();
+
+
+        for mapdir in MapDirection::iterator() {
+            let nbr_ndx = move_dir( ndx, mapdir);
+            if !valid_only || (nbr_ndx != INVALID as i32 && self.spaces[ nbr_ndx as usize].contents == MapSpaceContents::Playable) {
+                result.push(nbr_ndx );
+            }
+        }
+
+        result
+     }
+
+     pub fn edge_spaces( &self ) -> Vec<i32>
+    {
+        let mut edge_spaces = Vec::new();
+        for i in 0..self.spaces.len() {
+            let map_space = self.spaces[i];
+            if map_space.contents == MapSpaceContents::Playable {
+                for nbr in self.neighbors( i as i32, false ) {
+                    // If this is on the edge of the map, add it to the edge_space set
+                    if (nbr == INVALID as i32) || (self.spaces[nbr as usize].contents == MapSpaceContents::NotInMap ) {
+                        edge_spaces.push( map_space.ndx );
+                        break;
+                    }
+                }
+            }
+        }
+
+        edge_spaces
+    }
+
+    pub fn edge_spaces_corners( &self ) -> Vec<i32>
+    {
+        let edge_spaces = self.edge_spaces();
+        let mut edge_corners = Vec::new();
+
+        // check valid neighbor count in increasing order
+        for max_count in 1..6 {
+            for endx in 0..edge_spaces.len() {
+                let e = edge_spaces[endx];
+                if self.neighbors( e, true ).len() <= max_count {
+                    edge_corners.push( e );
+                }
+            }
+
+            if edge_corners.len() > 0 {
+                return edge_corners;
+            }
+        }
+
+        return edge_corners
+    }
+
+    pub fn check_reachability( &self ) -> bool {
+
+        let mut reachable: [bool; MAP_SZ * MAP_SZ] = [false; MAP_SZ * MAP_SZ];        
+
+        // flood fill check that map_copy is still reachable from everywhere
+        for i in 0..self.spaces.len() {
+            // start on any playable space
+            if self.spaces[i].contents == MapSpaceContents::Playable {
+                reachable[i] = true;
+                break;
+            }
+        }
+
+        let mut changed = true;
+        while changed {
+
+            changed = false;            
+            for i in 0..self.spaces.len() {
+                if self.spaces[i].contents == MapSpaceContents::Playable &&
+                   !reachable[i] {
+
+                    // see if any neighbors are reachable
+                    for nbr in self.neighbors( i as i32, true ) {
+                        if reachable[nbr as usize] {
+                            reachable[i] = true;
+                            changed = true;
+                            break;
+                        }
+                    }
+                }                
+            }            
+        }
+
+        // check reachability        
+        for i in 0..self.spaces.len() {
+            // start on any playable space
+            if !reachable[i] && self.spaces[i].contents == MapSpaceContents::Playable {
+                return false;
+            }
+        }
+
+        // otherwise, everything is reachable
+        true
+
+    }
 }
 
 impl Default for GameMap {
