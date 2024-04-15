@@ -12,9 +12,10 @@ use bevy::{
 
 };
 
+
 use rand::Rng;
 
-use std::f32::consts::PI;
+use std::{f32::consts::PI, time::Duration};
 
 use crate::gamestate::{GameMap, MapDirection, INVALID};
 use crate::gamestate::MapSpaceContents;
@@ -54,7 +55,6 @@ struct GoodStuff {
     player_stuff : [ PlayerStuff ; 4],
 }
 
-
 #[derive(Event)]
 enum GameStateChanged {
     CircleAdded(i32),
@@ -91,6 +91,11 @@ struct GameCamera;
 struct PlayerHelp;
 
 #[derive(Component)]
+struct CircleAnimator {
+    target : Vec3,
+}
+
+#[derive(Component)]
 struct GameCursor {
     ndx : usize,
     cursor_world : Vec3,
@@ -102,6 +107,11 @@ struct GameCursor {
 #[derive(Component)]
 struct SplitLabel {
     is_dest : bool
+}
+
+#[derive(Component)]
+struct AIController {
+    turn_timer: Timer,
 }
 
 
@@ -143,6 +153,8 @@ fn main() {
         .add_systems( Update, on_gamestate_changed )
         .add_systems( Update, draw_split_feedback )
         .add_systems( Update, player_guidance )
+        .add_systems( Update, update_ai )
+        .add_systems( Update, update_circ_anim )
         .add_event::<GameStateChanged>()
         .add_event::<TurnAdvance>()
         .run();
@@ -245,15 +257,21 @@ fn setup(
         }
     }
         
-    // cursor cube
-    commands.spawn((PbrBundle {
-        mesh: meshes.add(Cuboid::new(1.0, 1.0, 1.0)),
-        material: materials.add(Color::rgb_u8(255, 144, 10)),        
-        transform: Transform::from_xyz(5.0, 0.5, 5.0),
-        ..default()
-    }, GameCursor { ndx : 0, 
-        drag_from : None, drag_dest : None, cursor_world : Vec3::ZERO, split_pct : 0.5,
-        } )).id();
+    // cursor cube for easier debugging
+    // commands.spawn((PbrBundle {
+    //     mesh: meshes.add(Cuboid::new(1.0, 1.0, 1.0)),
+    //     material: materials.add(Color::rgb_u8(255, 144, 10)),        
+    //     transform: Transform::from_xyz(5.0, 0.5, 5.0),
+    //     ..default()
+    // }, GameCursor { ndx : 0, 
+    //     drag_from : None, drag_dest : None, cursor_world : Vec3::ZERO, split_pct : 0.5,
+    //     } ));
+
+
+    // cursor with no cube
+    commands.spawn((GameCursor { ndx : 0, 
+            drag_from : None, drag_dest : None, cursor_world : Vec3::ZERO, split_pct : 0.5,
+            }, Transform::default() ));
     
     // light
     commands.spawn(PointLightBundle {
@@ -349,6 +367,10 @@ fn setup(
             SplitLabel { is_dest : false },
         ));
 
+
+    commands.spawn( AIController {
+        turn_timer : Timer::new(Duration::from_secs_f32( 2.0 ), TimerMode::Once),        
+    });
 
 
     // 2D scene -------------------------------
@@ -560,7 +582,8 @@ fn handle_input(
                         if (split_count > 0) {                        
                             game.map.spaces[ found_ndx ].player = (active_player + 1) as u8;
                             game.map.spaces[ found_ndx ].power = split_count as u8;
-                            ev_gamestate.send( GameStateChanged::CircleAdded( found_ndx as i32) );
+                            //ev_gamestate.send( GameStateChanged::CircleAdded( found_ndx as i32) );
+                            ev_gamestate.send( GameStateChanged::CircleSplit( drag_from_ndx, found_ndx as i32) );                            
 
                             game.map.spaces[ drag_from_ndx as usize].power -= split_count as u8;
                             ev_gamestate.send( GameStateChanged::CircleAdded( drag_from_ndx) );
@@ -650,7 +673,7 @@ fn mapdir_from_drag( pos : Vec3, start_pos : Vec3 ) -> MapDirection
 fn draw_split_feedback(
     cursor_q: Query<(&Transform, &GameCursor)>,    
     camera_q: Query<(&Camera, &Transform, &GlobalTransform), With<GameCamera>>,
-    mut label_q: Query<(&SplitLabel, &mut Style, &mut Text)>,    
+    mut label_q: Query<(&SplitLabel, &mut Style, &mut Text, &mut Visibility)>,    
     stuff: Res<GoodStuff>,
     game: Res<GameState>,
     mut gizmos: Gizmos,
@@ -674,7 +697,7 @@ fn draw_split_feedback(
         let src_pow = game.map.spaces[ drag_from_ndx ].power as i32;
         let split_count = calc_split(cursor_info.split_pct, src_pow);
 
-        for (lblinfo, mut style, mut label) in &mut label_q {
+        for (lblinfo, mut style, mut label, mut vis) in &mut label_q {
             
             let mut wpos;                        
             if (lblinfo.is_dest) {
@@ -694,12 +717,19 @@ fn draw_split_feedback(
             style.top = Val::Px(viewport_position.y);
             style.left = Val::Px(viewport_position.x);
 
+            *vis = Visibility::Visible;
+
         }
 
         // println!( "Drag angle: {} degrees dir {:?}", angle_degrees, mapdir );
     } else {
         // not dragging, should we show preview?                
-        let ndx = cursor_info.ndx as i32;        
+        let ndx = cursor_info.ndx as i32;
+
+        // Hide the split labels
+        for (_, _, _, mut vis) in &mut label_q {
+            *vis = Visibility::Hidden;
+        }
 
         // look at the hovered square
         if ((ndx >= 0) && (ndx < 100)) {
@@ -864,13 +894,16 @@ fn player_guidance(
     mut ev_turn: EventReader<TurnAdvance>, ) 
 {
     for ev in ev_turn.read() {
-
-        let prompt = format!("It is now player {} turn", ev.0 );
+        
         let mut text = helper_q.single_mut();
         let pinfo = &stuff.player_stuff[ev.0 as usize];
         //text.style.color = pinfo.color;
         text.sections[0].style.color = pinfo.color;
-        text.sections[0].value = prompt;
+        if (pinfo.ptype == PlayerType::Local) {
+            text.sections[0].value = format!("Player {}'s turn.", ev.0 + 1 );        
+        } else {
+            text.sections[0].value = "Waiting for Computer Player".into();
+        }
     }
 }
 
@@ -884,54 +917,127 @@ fn on_gamestate_changed(
 {
     for ev in ev_gamestate.read() {
 
+        let mut split_from_ndx : Option<usize> = None;
+        let mut spawn_ndx = INVALID;
+
         match ev {
-            GameStateChanged::CircleAdded(ndx ) => {
-                
-                let ndx = *ndx as usize;
-                let spc = gamestate.map.spaces[ndx];
-                println!("Added circle at {}, power is {}, player {}", ndx, spc.power, spc.player  );
-
-                // Get the maptile entity that is the parent
-
-                
-                // Remove any existing childs                
-                let ent_vis = gamestate.map_visuals[ndx];
-                let vis = q_mapvis.get( gamestate.map_visuals[ndx]).unwrap();
-                match vis.circle {                    
-                    Some(child_ent) => { 
-                        commands.entity(ent_vis).remove_children( &[ child_ent ]); 
-                        commands.entity( child_ent ).despawn();
-                    }
-                    None => {}
-                }
-
-                //commands.entity(ent_vis).
-                let ring_sz = if spc.power == 1 { 0.9 } else { 1.25 };
-
-                let ent_ring = commands.spawn((PbrBundle {            
-                    mesh: stuff.ring_mesh.clone(),
-                    material: stuff.player_stuff[spc.player as usize - 1].ring_mtl[ (spc.power as usize) - 1 ].clone(),
-                    transform: Transform {
-                        translation : Vec3 { x: 0.0, y : 0.2, z : 0.0 },
-                        scale: Vec3::splat( ring_sz ),
-                        ..default()
-                    },
-                    //transform: Transform::from_scale(Vec3::new(10.0, 10.0, 10.0)),
-                    //     Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)).with_scale( Vec3::new(4.0, 4.0, 4.0) ),
-                    ..default()
-                }, NotShadowCaster) ).id();
-
-
-                let mut vis = q_mapvis.get_mut( gamestate.map_visuals[ndx] ).unwrap();
-                vis.circle = Some(ent_ring);
-
-                commands.entity(ent_vis).add_child(ent_ring);
-
-
+            GameStateChanged::CircleAdded(ndx ) => {                
+                spawn_ndx = *ndx as usize;                
             }
             GameStateChanged::CircleSplit( src, dest) => {
-                println!("Split circle at {} to {}", src, dest  );
+                spawn_ndx = *dest as usize;
+                split_from_ndx = Some(*src as usize);
             }
         }
+
+        if (spawn_ndx != INVALID)
+        {
+
+            let spc = gamestate.map.spaces[spawn_ndx];
+            println!("Added circle at {}, power is {}, player {}", spawn_ndx, spc.power, spc.player  );
+
+            // Get the maptile entity that is the parent
+
+            
+            // Remove any existing childs                
+            let ent_vis = gamestate.map_visuals[spawn_ndx];
+            let vis = q_mapvis.get( gamestate.map_visuals[spawn_ndx]).unwrap();
+            match vis.circle {                    
+                Some(child_ent) => { 
+                    commands.entity(ent_vis).remove_children( &[ child_ent ]); 
+                    commands.entity( child_ent ).despawn();
+                }
+                None => {}
+            }
+
+            //commands.entity(ent_vis).
+            let ring_sz = if spc.power == 1 { 0.9 } else { 1.25 };
+
+            let targ_pos = Vec3 { x: 0.0, y : 0.2, z : 0.0 };
+            let mut spawn_pos = targ_pos;
+            if (split_from_ndx.is_some()) {
+                let split_from_ndx = split_from_ndx.unwrap();
+                let start_pos = worldpos_from_mapindex( split_from_ndx as i32 );
+                let targ_pos_w = worldpos_from_mapindex( spawn_ndx as i32 );
+                
+                spawn_pos = (start_pos - targ_pos_w) + targ_pos;
+                //println!( "Spawn Pos is {:?}", spawn_pos );
+            }
+
+        
+            let mtl = stuff.player_stuff[spc.player as usize - 1].ring_mtl[ (spc.power as usize) - 1 ].clone();                        
+            let ent_ring = 
+            
+            commands.spawn((PbrBundle {
+                mesh: stuff.ring_mesh.clone(),
+                material: mtl,
+                transform: Transform {
+                    translation : spawn_pos,
+                    scale: Vec3::splat( ring_sz ),
+                    ..default()
+                },
+                ..default()
+            }, NotShadowCaster, CircleAnimator { target : targ_pos }) ).id();
+
+
+            let mut vis = q_mapvis.get_mut( gamestate.map_visuals[spawn_ndx] ).unwrap();
+            vis.circle = Some(ent_ring);
+
+            commands.entity(ent_vis).add_child(ent_ring);
+        }
+    }
+}
+
+fn update_ai( 
+    //mut commands: Commands,    
+    time: Res<Time>,
+    stuff: Res<GoodStuff>,
+    mut q_ai : Query<&mut AIController>,
+    mut ev_turn: EventWriter<TurnAdvance>,    
+    mut game: ResMut<GameState>, 
+) {
+    let pinfo = &stuff.player_stuff[game.player_turn as usize];
+    if (pinfo.ptype == PlayerType::AI) {
+
+            let mut ai = q_ai.single_mut();
+            ai.turn_timer.tick( time.delta());
+            if (ai.turn_timer.finished()) {
+                // Take AI Turn
+                // TODO
+
+                // Reset turn timer
+                ai.turn_timer.reset();
+
+                // Advance to the next player's turn
+                let mut pnum = game.player_turn;
+                loop {
+                    pnum = pnum + 1;
+                    if (pnum >= stuff.player_stuff.len() as i32) {
+                        pnum = 0;
+                    }
+
+                    if (stuff.player_stuff[pnum as usize].ptype != PlayerType::NotActive) {
+                        break;
+                    }
+
+                    if (pnum == game.player_turn) {
+                        println!("Didn't find any active players?");
+                        break;
+                    }
+                }
+                game.player_turn = pnum;
+                ev_turn.send( TurnAdvance(pnum) );
+            }
+    }
+}
+
+fn update_circ_anim( time: Res<Time>,
+    mut circ_q : Query<(&mut Transform, &CircleAnimator)> )
+{
+    //println!("update_circle_anim");
+    for (mut xform, ca ) in &mut circ_q {
+
+        xform.translation = Vec3::lerp( xform.translation, ca.target, 0.1 );        
+        //println!("xlate {:?} targ {:?}", xform.translation, ca.target );
     }
 }
