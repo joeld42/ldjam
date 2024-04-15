@@ -8,7 +8,7 @@ use bevy::{
     },
     pbr::NotShadowCaster,
     prelude::*,    
-    render::{mesh::VertexAttributeValues, texture::{ImageAddressMode, ImageSamplerDescriptor}},
+    render::{mesh::VertexAttributeValues, texture::{ImageAddressMode, ImageSamplerDescriptor}}, window::WindowResized,
 
 };
 
@@ -73,7 +73,9 @@ struct GameState {
     //map : GameMap,
     snapshot : GameSnapshot,
     map_visuals: Vec<Entity>,
-    player_turn : i32,    
+    player_count : i32,
+    player_turn : i32,
+    turn_num : i32,
 }
 
 impl Default for GameState {
@@ -81,7 +83,9 @@ impl Default for GameState {
         GameState {
             snapshot: GameSnapshot::default(),
             map_visuals: Vec::new(),
-            player_turn: 0,            
+            player_count: 0,
+            player_turn: 0,
+            turn_num: 0
         }
     }
 }
@@ -94,6 +98,15 @@ struct GameCamera;
 
 #[derive(Component)]
 struct PlayerHelp;
+
+#[derive(Component)]
+struct RoundScoringFrame;
+
+#[derive(Component)]
+struct RoundIcon(i32);
+
+#[derive(Component)]
+struct TurnIcon(i32);
 
 #[derive(Component)]
 struct CircleAnimator {
@@ -158,6 +171,7 @@ fn main() {
         .add_systems( Update, player_guidance )
         .add_systems( Update, update_ai )
         .add_systems( Update, update_circ_anim )
+        .add_systems( Update, update_ui )
         .add_event::<GameStateChanged>()
         .add_event::<TurnAdvance>()
         .run();
@@ -231,7 +245,9 @@ fn setup(
     stuff.player_stuff[2].color  = Color::rgb_u8(5, 254, 161);
     stuff.player_stuff[2].color2 = Color::rgb_u8(1, 152, 30);
 
-    stuff.player_stuff[3].color  = Color::rgb_u8(185, 103, 255);
+    // stuff.player_stuff[3].color  = Color::rgb_u8(185, 103, 255);
+    // stuff.player_stuff[3].color2 = Color::rgb_u8(52, 37, 174);
+    stuff.player_stuff[3].color  = Color::rgb_u8(161, 39, 255);
     stuff.player_stuff[3].color2 = Color::rgb_u8(52, 37, 174);
     
     for i in 1..=20 {
@@ -412,12 +428,42 @@ fn setup(
     //     ..default()
     // });
 
-
     // setup player status
-    stuff.player_stuff[0].ptype = PlayerType::Local;
+    stuff.player_stuff[0].ptype = PlayerType::AI;
     stuff.player_stuff[1].ptype = PlayerType::AI;
     stuff.player_stuff[2].ptype = PlayerType::AI;
-    stuff.player_stuff[3].ptype = PlayerType::NotActive;
+    stuff.player_stuff[3].ptype = PlayerType::AI;
+    
+
+    commands.spawn((SpriteBundle {
+        texture: asset_server.load("turn_frame.png"),
+        transform: Transform::from_xyz( 500.0, 0.0, 1.0 ),        
+        ..default()
+    }, RoundScoringFrame )).with_children(|parent| {
+        for i in 0..4 {
+            let icon_y  = 150.0 - (i as f32) * 100.0;
+            parent.spawn(( SpriteBundle {
+                texture: asset_server.load("icon_rat.png"),                
+                transform: Transform::from_xyz( 30.0, icon_y, 2.0 ).with_scale( Vec3::splat( 0.6 )),
+                ..default()
+            }, RoundIcon(i)));
+
+            // Turn indicators            
+            for j in 0..4 {
+                parent.spawn( (SpriteBundle {
+                    sprite : Sprite {
+                        color : Color::rgba( 1.0, 1.0, 1.0, 0.02 ),
+                        ..default()
+                    },
+                    texture: asset_server.load("hex.png"),                    
+                    transform: Transform::from_xyz(  (j as f32) * 25.0, icon_y - 50.0, 2.0 ).with_scale( Vec3::splat( 0.3 )),
+                    ..default()
+                }, TurnIcon(i*4 + j)));
+            }
+
+        }
+    });
+    
 
 }
 
@@ -581,6 +627,8 @@ fn handle_input(
                                 }
                             }
                             game.player_turn = pnum;
+                            game.turn_num += 1;
+
                             ev_turn.send( TurnAdvance(pnum) );
                         }
                     }            
@@ -774,6 +822,10 @@ fn build_map (
         }
     }
 
+    // Remember this
+    gamestate.player_count = player_count;
+
+
     // First, set up the map indices and build the map
     let mut rng = rand::thread_rng();
     let mut index = 0;
@@ -890,6 +942,7 @@ fn player_guidance(
     game: Res<GameState>,
     //mut helper_q: Query<(&mut Text, &mut Style), With<PlayerHelp>>,        
     mut helper_q: Query<&mut Text, With<PlayerHelp>>,        
+    mut turnicon_q: Query<(&mut Sprite, &TurnIcon)>,        
     mut ev_turn: EventReader<TurnAdvance>, ) 
 {
     for ev in ev_turn.read() {
@@ -915,8 +968,16 @@ fn player_guidance(
             } else {
                 "Waiting for Computer Player".into()
             }
+        }
 
-        }        
+        let icon_n = game.turn_num / game.player_count;
+        for (mut sprite, turn) in &mut turnicon_q {
+            if turn.0 < icon_n {
+                sprite.color = Color::rgba( 1.0, 1.0, 1.1, 0.3 );
+            } else if turn.0 == icon_n {
+                sprite.color = pinfo.color;
+            }
+        }
     }
 }
 
@@ -1086,12 +1147,27 @@ fn update_ai(
             }
         }
         game.player_turn = pnum;
+        game.turn_num += 1;
         ev_turn.send( TurnAdvance(pnum) );
     }
 
 }
 
-fn update_circ_anim( _time: Res<Time>,
+fn update_ui( 
+    _time: Res<Time>,
+    mut scoreframe_q : Query<&mut Transform, With<RoundScoringFrame>>,
+    mut ev_window: EventReader<WindowResized>,
+ )
+{
+    //zzzwindows.single().sc
+    for ev in ev_window.read() {
+        println!("Window resized {} {}", ev.width, ev.height );
+        let mut xform = scoreframe_q.single_mut();
+        xform.translation = Vec3 { x : (ev.width - 177.0) /2.0, y : 0.0, z : 1.0 };
+    }
+}
+
+fn update_circ_anim( _time: Res<Time>,    
     mut circ_q : Query<(&mut Transform, &CircleAnimator)> )
 {
     //println!("update_circle_anim");
