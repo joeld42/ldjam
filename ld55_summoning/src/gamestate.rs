@@ -36,6 +36,14 @@ pub struct GameMap {
     pub spaces : [ MapSpace ; 100],
 }
 
+#[derive(Copy, Clone, Default, Debug)]
+pub struct GameSnapshot
+{
+    pub map : GameMap,
+    pub score : [ i32; 4],
+}
+
+
 pub const MAP_SZ : usize = 10;
 pub const INVALID : usize = 9999;
 
@@ -54,7 +62,7 @@ pub fn move_dir( ndx : i32, dir : MapDirection ) -> i32
     let row : i32 = ndx / (MAP_SZ as i32);
     let col : i32 = ndx % (MAP_SZ as i32);
 
-    let row_sz = MAP_SZ as i32;
+    //let row_sz = MAP_SZ as i32;
     if col % 2 == 1 {
         // Odd Col
         match dir {

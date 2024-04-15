@@ -8,7 +8,7 @@ use bevy::{
     },
     pbr::NotShadowCaster,
     prelude::*,    
-    render::{camera, color, mesh::VertexAttributeValues, texture::{ImageAddressMode, ImageSamplerDescriptor}}, text,
+    render::{mesh::VertexAttributeValues, texture::{ImageAddressMode, ImageSamplerDescriptor}},
 
 };
 
@@ -17,19 +17,19 @@ use rand::Rng;
 
 use std::{f32::consts::PI, time::Duration};
 
-use crate::gamestate::{GameMap, MapDirection, INVALID};
+use crate::gamestate::{GameSnapshot, MapDirection, INVALID};
 use crate::gamestate::MapSpaceContents;
 pub mod gamestate;
 
 const HEX_SZ : f32 = 1.0;
 
-#[derive(Resource,Default)]
-struct CardDeck {
-    texture: Handle<Image>,
-    layout: Handle<TextureAtlasLayout>,
+// #[derive(Resource,Default)]
+// struct CardDeck {
+//     texture: Handle<Image>,
+//     layout: Handle<TextureAtlasLayout>,
 
-    // todo: card stats, etc 
-}
+//     // todo: card stats, etc 
+// }
 
 #[derive(Default, PartialEq)]
 enum PlayerType {
@@ -66,7 +66,8 @@ struct TurnAdvance(i32);
 
 #[derive(Resource)]
 struct GameState {
-    map : GameMap,
+    //map : GameMap,
+    snapshot : GameSnapshot,
     map_visuals: Vec<Entity>,
     player_turn : i32,    
 }
@@ -74,7 +75,7 @@ struct GameState {
 impl Default for GameState {
     fn default() -> GameState {
         GameState {
-            map: GameMap::default(),
+            snapshot: GameSnapshot::default(),
             map_visuals: Vec::new(),
             player_turn: 0,
         }
@@ -100,7 +101,7 @@ struct GameCursor {
     ndx : usize,
     cursor_world : Vec3,
     drag_from : Option<usize>,
-    drag_dest : Option<usize>,
+    _drag_dest : Option<usize>,
     split_pct : f32,
 }
 
@@ -146,9 +147,7 @@ fn main() {
         .insert_resource( GoodStuff::default() )
         .insert_resource( GameState::default() )
         .add_systems(Startup, setup)
-        .add_systems(Startup, build_map )
-        //.add_systems( Update, spawn_cards)
-        .add_systems( Update, test_rings)
+        .add_systems(Startup, build_map )                
         .add_systems( Update, handle_input )
         .add_systems( Update, on_gamestate_changed )
         .add_systems( Update, draw_split_feedback )
@@ -165,11 +164,11 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,    
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    //mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
     //mut cards: ResMut<CardDeck>,
     mut stuff: ResMut<GoodStuff>,
     mut config_store: ResMut<GizmoConfigStore>,
-    mut gamestate: ResMut<GameState>,
+    //game: Res<GameState>,
     asset_server: Res<AssetServer>
 ) {
 
@@ -268,9 +267,10 @@ fn setup(
     //     } ));
 
 
+    
     // cursor with no cube
     commands.spawn((GameCursor { ndx : 0, 
-            drag_from : None, drag_dest : None, cursor_world : Vec3::ZERO, split_pct : 0.5,
+            drag_from : None, _drag_dest : None, cursor_world : Vec3::ZERO, split_pct : 0.5,
             }, Transform::default() ));
     
     // light
@@ -440,37 +440,6 @@ fn setup(
 //     }
 // }
 
-fn test_rings ( 
-    mut gamestate: ResMut<GameState>,
-    cursor_q: Query<(&Transform, &GameCursor)>,
-    keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut ev_gamestate: EventWriter<GameStateChanged>,
-)
-{
-    if keyboard_input.just_pressed( KeyCode::KeyW ) {
-        println!("W pressed");
-
-        let (xform, cursor_info) = cursor_q.single();        
-        if (gamestate.map.spaces[ cursor_info.ndx ].player == 0) {
-            gamestate.map.spaces[ cursor_info.ndx ].player = 1;            
-        }
-
-        gamestate.map.spaces[ cursor_info.ndx ].power = gamestate.map.spaces[ cursor_info.ndx ].power + 1;
-        println!("index {} power now {}", cursor_info.ndx,  gamestate.map.spaces[ cursor_info.ndx ].power );
-
-        ev_gamestate.send( GameStateChanged::CircleAdded( cursor_info.ndx as i32) );
-    }
-}
-
-// fn handle_input (
-//     mut commands: Commands,
-//     mouse_buttons: Res<Input<MouseButton>>,
-//     windows: Res<Windows>,
-// ) {
-//     if let Some(cursor_position) = windows.single().cursor_position() {
-//         zz
-//     }
-// }
 
 
 fn handle_input(
@@ -543,7 +512,7 @@ fn handle_input(
         let active_player = game.player_turn;
 
         // Figure out split amount based on distance
-        if (cursor_info.drag_from.is_some()) {
+        if cursor_info.drag_from.is_some() {
                 
             let drag_from_ndx = cursor_info.drag_from.unwrap() as i32;
             let drag_from_pos = worldpos_from_mapindex(drag_from_ndx as i32);        
@@ -554,38 +523,39 @@ fn handle_input(
             cursor_info.split_pct = dnorm;
         }
 
-        if (mouse_button_input.just_pressed(MouseButton::Left)) {
+        if mouse_button_input.just_pressed(MouseButton::Left) {
 
             // Make sure there is some power to drag from
-            if (ndx >=0) && (ndx != INVALID) && (game.map.spaces[ ndx ].power > 1 ) && (game.map.spaces[ ndx ].player == (active_player + 1) as u8 ) {            
+            if (ndx != INVALID) && (game.snapshot.map.spaces[ ndx ].power > 1 ) && 
+            (game.snapshot.map.spaces[ ndx ].player == (active_player + 1) as u8 ) {            
                 cursor_info.drag_from = Some( ndx );
                 println!("Drag from: {}", ndx );
             }
         }
         
-        if (mouse_button_input.just_released(MouseButton::Left)) {
+        if mouse_button_input.just_released(MouseButton::Left) {
             
-            if (cursor_info.drag_from.is_some()) {
+            if cursor_info.drag_from.is_some() {
                 
                 let drag_from_ndx = cursor_info.drag_from.unwrap() as i32;
                 let drag_from_pos = worldpos_from_mapindex(drag_from_ndx as i32);        
 
                 let mapdir = mapdir_from_drag( cursor_info.cursor_world, drag_from_pos );
-                let found = game.map.search_dir( drag_from_ndx,  mapdir );
+                let found = game.snapshot.map.search_dir( drag_from_ndx,  mapdir );
                 if (found != drag_from_ndx) && (found != gamestate::INVALID as i32) 
                 {
                     let found_ndx = found as usize;
-                    if (game.map.spaces[ found_ndx ].player == 0) {
+                    if game.snapshot.map.spaces[ found_ndx ].player == 0 {
 
-                        let src_pow = game.map.spaces[ drag_from_ndx as usize ].power as i32;
+                        let src_pow = game.snapshot.map.spaces[ drag_from_ndx as usize ].power as i32;
                         let split_count = calc_split(cursor_info.split_pct, src_pow);
-                        if (split_count > 0) {                        
-                            game.map.spaces[ found_ndx ].player = (active_player + 1) as u8;
-                            game.map.spaces[ found_ndx ].power = split_count as u8;
+                        if split_count > 0 {
+                            game.snapshot.map.spaces[ found_ndx ].player = (active_player + 1) as u8;
+                            game.snapshot.map.spaces[ found_ndx ].power = split_count as u8;
                             //ev_gamestate.send( GameStateChanged::CircleAdded( found_ndx as i32) );
                             ev_gamestate.send( GameStateChanged::CircleSplit( drag_from_ndx, found_ndx as i32) );                            
 
-                            game.map.spaces[ drag_from_ndx as usize].power -= split_count as u8;
+                            game.snapshot.map.spaces[ drag_from_ndx as usize].power -= split_count as u8;
                             ev_gamestate.send( GameStateChanged::CircleAdded( drag_from_ndx) );
 
 
@@ -593,15 +563,15 @@ fn handle_input(
                             let mut pnum = game.player_turn;
                             loop {
                                 pnum = pnum + 1;
-                                if (pnum >= stuff.player_stuff.len() as i32) {
+                                if pnum >= stuff.player_stuff.len() as i32 {
                                     pnum = 0;
                                 }
 
-                                if (stuff.player_stuff[pnum as usize].ptype != PlayerType::NotActive) {
+                                if stuff.player_stuff[pnum as usize].ptype != PlayerType::NotActive {
                                     break;
                                 }
 
-                                if (pnum == game.player_turn) {
+                                if pnum == game.player_turn {
                                     println!("Didn't find any active players?");
                                     break;
                                 }
@@ -614,8 +584,8 @@ fn handle_input(
             }
         }
 
-        if (!mouse_button_input.pressed(MouseButton::Left)) {
-            if (cursor_info.drag_from.is_some()) {
+        if !mouse_button_input.pressed(MouseButton::Left) {
+            if cursor_info.drag_from.is_some() {
                 println!("Drag clear" );
             }
             cursor_info.drag_from = None;            
@@ -625,8 +595,8 @@ fn handle_input(
 
 fn draw_map_dir( gizmos: &mut Gizmos, game : &GameState, ndx : i32, dir : MapDirection, color : Color, verbose : bool ) -> Vec3
 {    
-    let found = game.map.search_dir( ndx,  dir );
-    if (verbose) {
+    let found = game.snapshot.map.search_dir( ndx,  dir );
+    if verbose {
         let dir_str = format!("{:?}", dir);
         let dir_str_padded = format!("{:<10}", dir_str);                    
         println!("   {} {} Open {}", dir_str_padded, gamestate::move_dir( ndx, dir ),  found );    
@@ -655,7 +625,7 @@ fn mapdir_from_drag( pos : Vec3, start_pos : Vec3 ) -> MapDirection
     let dir = pos - start_pos;
     let angle = dir.z.atan2(dir.x);
     let mut angle_degrees = angle.to_degrees() + (90.0 + 30.0);
-    if (angle_degrees < 0.0) {
+    if angle_degrees < 0.0 {
         angle_degrees = angle_degrees + 360.0;
     }
     
@@ -681,7 +651,7 @@ fn draw_split_feedback(
 {
     let offs = Vec3 { x : 0.0, y : 0.15, z : 0.0 };
 
-    let (cursor_transform, cursor_info) = cursor_q.single();
+    let ( _cursor_transform, cursor_info) = cursor_q.single();
     let player_col = stuff.player_stuff[ game.player_turn as usize].color;
 
     if cursor_info.drag_from.is_some() {
@@ -694,13 +664,13 @@ fn draw_split_feedback(
         let mapdir = mapdir_from_drag( cursor_info.cursor_world, drag_from_pos );        
         let dst_pos = draw_map_dir( &mut gizmos, &game, drag_from_ndx as i32, mapdir, player_col, false);
 
-        let src_pow = game.map.spaces[ drag_from_ndx ].power as i32;
+        let src_pow = game.snapshot.map.spaces[ drag_from_ndx ].power as i32;
         let split_count = calc_split(cursor_info.split_pct, src_pow);
 
         for (lblinfo, mut style, mut label, mut vis) in &mut label_q {
             
-            let mut wpos;                        
-            if (lblinfo.is_dest) {
+            let wpos;                        
+            if lblinfo.is_dest {
                 label.sections[0].value = format!("{}", split_count );
                 wpos = dst_pos;
             } else {            
@@ -709,7 +679,7 @@ fn draw_split_feedback(
             }
             label.sections[0].style.color = player_col;
             
-            let (camera, camera_transform, camera_global_transform) = camera_q.single();
+            let (camera, _camera_transform, camera_global_transform) = camera_q.single();
             let viewport_position = camera
                 .world_to_viewport(camera_global_transform, wpos)
                 .unwrap();
@@ -732,8 +702,8 @@ fn draw_split_feedback(
         }
 
         // look at the hovered square
-        if ((ndx >= 0) && (ndx < 100)) {
-            let mapsq = game.map.spaces[ ndx as usize ];
+        if (ndx >= 0) && (ndx < 100) {
+            let mapsq = game.snapshot.map.spaces[ ndx as usize ];
             
             // TODO: player check
             if (mapsq.contents == MapSpaceContents::Playable) && (mapsq.power > 1) && (mapsq.player == (game.player_turn + 1) as u8) {                
@@ -752,7 +722,7 @@ fn draw_split_feedback(
 
 fn calc_split( split_pct : f32, src_pow: i32) -> i32 {
     let split_count = split_pct * ((src_pow - 1) as f32);
-    let split_count = (split_count as i32);
+    let split_count = split_count as i32;
     split_count
 }
 
@@ -798,7 +768,7 @@ fn build_map (
     // First, set up the map indices and build the map
     let mut rng = rand::thread_rng();
     let mut index = 0;
-    for map_space in &mut gamestate.map {
+    for map_space in &mut gamestate.snapshot.map {
         map_space.ndx = index;
         index = index + 1;
 
@@ -824,7 +794,7 @@ fn build_map (
 
     // Find starting spaces
     let mut edge_spaces = Vec::new();
-    for map_space in &gamestate.map {
+    for map_space in &gamestate.snapshot.map {
         
         // TODO also check that it's on the "edge" of the map, or assign this
         // when generating
@@ -838,8 +808,8 @@ fn build_map (
             let random_index = rng.gen_range(0..edge_spaces.len());
             let selected_index = edge_spaces.remove(random_index) as usize;
 
-            gamestate.map.spaces[ selected_index ].player = (i+1) as u8;
-            gamestate.map.spaces[ selected_index ].power = 16;
+            gamestate.snapshot.map.spaces[ selected_index ].player = (i+1) as u8;
+            gamestate.snapshot.map.spaces[ selected_index ].power = 16;
 
             ev_gamestate.send( GameStateChanged::CircleAdded( selected_index as i32 ) );
         }
@@ -850,7 +820,7 @@ fn build_map (
     let hex_scene = asset_server.load("hexagon.glb#Scene0");
 
     let mut map_visuals = Vec::new();
-    for map_space in &gamestate.map {
+    for map_space in &gamestate.snapshot.map {
         let hex_pos = worldpos_from_mapindex( map_space.ndx );
         let ent = match map_space.contents {
             MapSpaceContents::NotInMap => Entity::PLACEHOLDER,
@@ -888,7 +858,7 @@ fn build_map (
 fn player_guidance( 
     //mut commands: Commands,
     stuff: Res<GoodStuff>,
-    game: Res<GameState>,
+    //game: Res<GameState>,
     //mut helper_q: Query<(&mut Text, &mut Style), With<PlayerHelp>>,        
     mut helper_q: Query<&mut Text, With<PlayerHelp>>,        
     mut ev_turn: EventReader<TurnAdvance>, ) 
@@ -899,7 +869,7 @@ fn player_guidance(
         let pinfo = &stuff.player_stuff[ev.0 as usize];
         //text.style.color = pinfo.color;
         text.sections[0].style.color = pinfo.color;
-        if (pinfo.ptype == PlayerType::Local) {
+        if pinfo.ptype == PlayerType::Local {
             text.sections[0].value = format!("Player {}'s turn.", ev.0 + 1 );        
         } else {
             text.sections[0].value = "Waiting for Computer Player".into();
@@ -918,7 +888,7 @@ fn on_gamestate_changed(
     for ev in ev_gamestate.read() {
 
         let mut split_from_ndx : Option<usize> = None;
-        let mut spawn_ndx = INVALID;
+        let spawn_ndx;
 
         match ev {
             GameStateChanged::CircleAdded(ndx ) => {                
@@ -930,10 +900,10 @@ fn on_gamestate_changed(
             }
         }
 
-        if (spawn_ndx != INVALID)
+        if spawn_ndx != INVALID
         {
 
-            let spc = gamestate.map.spaces[spawn_ndx];
+            let spc = gamestate.snapshot.map.spaces[spawn_ndx];
             println!("Added circle at {}, power is {}, player {}", spawn_ndx, spc.power, spc.player  );
 
             // Get the maptile entity that is the parent
@@ -955,7 +925,7 @@ fn on_gamestate_changed(
 
             let targ_pos = Vec3 { x: 0.0, y : 0.2, z : 0.0 };
             let mut spawn_pos = targ_pos;
-            if (split_from_ndx.is_some()) {
+            if split_from_ndx.is_some() {
                 let split_from_ndx = split_from_ndx.unwrap();
                 let start_pos = worldpos_from_mapindex( split_from_ndx as i32 );
                 let targ_pos_w = worldpos_from_mapindex( spawn_ndx as i32 );
@@ -997,11 +967,11 @@ fn update_ai(
     mut game: ResMut<GameState>, 
 ) {
     let pinfo = &stuff.player_stuff[game.player_turn as usize];
-    if (pinfo.ptype == PlayerType::AI) {
+    if pinfo.ptype == PlayerType::AI {
 
             let mut ai = q_ai.single_mut();
             ai.turn_timer.tick( time.delta());
-            if (ai.turn_timer.finished()) {
+            if ai.turn_timer.finished() {
                 // Take AI Turn
                 // TODO
 
@@ -1012,15 +982,15 @@ fn update_ai(
                 let mut pnum = game.player_turn;
                 loop {
                     pnum = pnum + 1;
-                    if (pnum >= stuff.player_stuff.len() as i32) {
+                    if pnum >= stuff.player_stuff.len() as i32 {
                         pnum = 0;
                     }
 
-                    if (stuff.player_stuff[pnum as usize].ptype != PlayerType::NotActive) {
+                    if stuff.player_stuff[pnum as usize].ptype != PlayerType::NotActive {
                         break;
                     }
 
-                    if (pnum == game.player_turn) {
+                    if pnum == game.player_turn {
                         println!("Didn't find any active players?");
                         break;
                     }
@@ -1031,7 +1001,7 @@ fn update_ai(
     }
 }
 
-fn update_circ_anim( time: Res<Time>,
+fn update_circ_anim( _time: Res<Time>,
     mut circ_q : Query<(&mut Transform, &CircleAnimator)> )
 {
     //println!("update_circle_anim");
