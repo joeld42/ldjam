@@ -17,7 +17,7 @@ use gamestate::gen_valid_moves;
 use rand::Rng;
 use rand::seq::SliceRandom;
 
-use std::collections::HashSet;
+//use std::collections::HashSet;
 use std::{f32::consts::PI, time::Duration};
 
 use crate::gamestate::{GameSnapshot, MapDirection, INVALID};
@@ -49,6 +49,7 @@ struct PlayerStuff
     color2 : Color,
     ring_mtl: [ Handle<StandardMaterial>; 21 ],
     ptype : PlayerType,
+    out_of_moves : bool,
 }
 
 // Resource  stuff
@@ -80,7 +81,7 @@ impl Default for GameState {
         GameState {
             snapshot: GameSnapshot::default(),
             map_visuals: Vec::new(),
-            player_turn: 0,
+            player_turn: 0,            
         }
     }
 }
@@ -885,8 +886,8 @@ fn build_map (
 
 fn player_guidance( 
     //mut commands: Commands,
-    stuff: Res<GoodStuff>,
-    //game: Res<GameState>,
+    mut stuff: ResMut<GoodStuff>,
+    game: Res<GameState>,
     //mut helper_q: Query<(&mut Text, &mut Style), With<PlayerHelp>>,        
     mut helper_q: Query<&mut Text, With<PlayerHelp>>,        
     mut ev_turn: EventReader<TurnAdvance>, ) 
@@ -894,14 +895,28 @@ fn player_guidance(
     for ev in ev_turn.read() {
         
         let mut text = helper_q.single_mut();
-        let pinfo = &stuff.player_stuff[ev.0 as usize];
+        let pinfo = &mut stuff.player_stuff[ev.0 as usize];
         //text.style.color = pinfo.color;
         text.sections[0].style.color = pinfo.color;
-        if pinfo.ptype == PlayerType::Local {
-            text.sections[0].value = format!("Player {}'s turn.", ev.0 + 1 );        
+
+        let moves = gen_valid_moves( game.snapshot, ev.0 as usize);
+        if moves.is_empty() {
+            pinfo.out_of_moves = true;
+
+            text.sections[0].value = if pinfo.ptype == PlayerType::Local {            
+                format!("Player {} has no moves and must pass.", ev.0 + 1 )
+            } else {
+                "Computer Player is out of moves and must pass".into()
+            }
+
         } else {
-            text.sections[0].value = "Waiting for Computer Player".into();
-        }
+            text.sections[0].value = if pinfo.ptype == PlayerType::Local {            
+                format!("Player {}'s turn.", ev.0 + 1 )
+            } else {
+                "Waiting for Computer Player".into()
+            }
+
+        }        
     }
 }
 
@@ -996,14 +1011,19 @@ fn update_ai(
     mut game: ResMut<GameState>, 
 ) {
     let pinfo = &stuff.player_stuff[game.player_turn as usize];
-    if pinfo.ptype == PlayerType::AI {
-
-            let mut ai = q_ai.single_mut();
+    let mut should_advance_turn = false;
+    let mut ai = q_ai.single_mut();
+    if pinfo.ptype == PlayerType::Local && pinfo.out_of_moves {
+        ai.turn_timer.tick( time.delta());
+        if ai.turn_timer.finished() {
+            should_advance_turn = true;
+        }
+    } else if pinfo.ptype == PlayerType::AI {            
             ai.turn_timer.tick( time.delta());
             if ai.turn_timer.finished() {
                 // Take AI Turn
                 let moves = gen_valid_moves( game.snapshot, game.player_turn as usize);
-                if (moves.is_empty()) {
+                if moves.is_empty() {
                     println!("AI has no valid moves and will pass.");
                 } else {
                     println!("AI has {} valid moves", moves.len() );
@@ -1017,7 +1037,7 @@ fn update_ai(
                     let mut split_ndx = None;
                     for mapsq in &game.snapshot.map {
                         let oldsq = old.map.spaces[ mapsq.ndx as usize ];
-                        if (oldsq.power > mapsq.power) {                            
+                        if oldsq.power > mapsq.power {                            
                             split_ndx = Some( mapsq.ndx );
                             break;
                         }
@@ -1026,7 +1046,7 @@ fn update_ai(
                     // Send any adds
                     for mapsq in &game.snapshot.map {
                         let oldsq = old.map.spaces[ mapsq.ndx as usize ];
-                        if (oldsq.power != mapsq.power) {
+                        if oldsq.power != mapsq.power {
                             if split_ndx.is_none() || oldsq.power > mapsq.power {                                
                                 ev_gamestate.send( GameStateChanged::CircleAdded( mapsq.ndx ) );
                             } else {
@@ -1038,32 +1058,37 @@ fn update_ai(
                     }
                 }
 
-                // Reset turn timer
-                ai.turn_timer.reset();
-                ai.turn_timer.set_duration( Duration::from_secs_f32( 0.15 ) );
-
-                // Advance to the next player's turn
-                // todo Wrap this logic up
-                let mut pnum = game.player_turn;
-                loop {
-                    pnum = pnum + 1;
-                    if pnum >= stuff.player_stuff.len() as i32 {
-                        pnum = 0;
-                    }
-
-                    if stuff.player_stuff[pnum as usize].ptype != PlayerType::NotActive {
-                        break;
-                    }
-
-                    if pnum == game.player_turn {
-                        println!("Didn't find any active players?");
-                        break;
-                    }
-                }
-                game.player_turn = pnum;
-                ev_turn.send( TurnAdvance(pnum) );
+                should_advance_turn = true;                
             }
     }
+
+    if should_advance_turn {
+        // Reset turn timer
+        ai.turn_timer.reset();
+        ai.turn_timer.set_duration( Duration::from_secs_f32( 1.0 ) );
+
+        // Advance to the next player's turn
+        // todo Wrap this logic up
+        let mut pnum = game.player_turn;
+        loop {
+            pnum = pnum + 1;
+            if pnum >= stuff.player_stuff.len() as i32 {
+                pnum = 0;
+            }
+
+            if stuff.player_stuff[pnum as usize].ptype != PlayerType::NotActive {
+                break;
+            }
+
+            if pnum == game.player_turn {
+                println!("Didn't find any active players?");
+                break;
+            }
+        }
+        game.player_turn = pnum;
+        ev_turn.send( TurnAdvance(pnum) );
+    }
+
 }
 
 fn update_circ_anim( _time: Res<Time>,
