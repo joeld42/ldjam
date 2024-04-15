@@ -1,3 +1,4 @@
+use std::slice::Iter;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum MapSpaceContents {
@@ -13,7 +14,14 @@ pub enum MapDirection {
     NorthWest,
     South,
     SouthWest,
-    SouthEast
+    SouthEast    
+}
+
+impl MapDirection {
+    pub fn iterator() -> impl Iterator<Item = MapDirection> {
+        [ MapDirection::North, MapDirection::NorthEast, MapDirection::SouthEast, 
+        MapDirection::South, MapDirection::SouthWest, MapDirection::NorthWest ].iter().copied()
+    }
 }
 
 impl Default for MapSpaceContents {
@@ -129,4 +137,43 @@ impl<'a> IntoIterator for &'a mut GameMap {
     fn into_iter(self) -> Self::IntoIter {
         self.spaces.iter_mut()
     }
+}
+
+pub fn gen_valid_moves( gamecurr : GameSnapshot, for_player : usize ) -> Vec<GameSnapshot>
+{
+    let mut result = Vec::new();
+
+    // Find all the squares we could move from
+    let mut split_squares = Vec::new();
+    for mapsq in &gamecurr.map {
+        if (mapsq.power > 1) && (mapsq.player == (for_player + 1) as u8) {
+            // This is our space, and we can potentially split here
+            for mapdir in MapDirection::iterator() {
+                let ndx = mapsq.ndx;
+                let move_ndx = gamecurr.map.search_dir( ndx, mapdir );
+                if move_ndx != ndx && move_ndx != INVALID as i32 {
+                    // We can move in this direction
+                    split_squares.push( (ndx, move_ndx ));
+                }
+            }
+        }
+    }
+
+    for (start_ndx, move_ndx) in split_squares {
+        // can move from start_ndx to move_ndx                
+        let start_ndx = start_ndx as usize;
+        let move_ndx = move_ndx as usize;
+
+        for amt in 1..gamecurr.map.spaces[start_ndx].power
+        {
+            let mut next : GameSnapshot = gamecurr;            
+            next.map.spaces[start_ndx].power -= amt;
+            next.map.spaces[move_ndx].power += amt;
+            next.map.spaces[move_ndx].player = (for_player + 1) as u8;
+
+            result.push( next );
+        }
+    }
+
+    result
 }

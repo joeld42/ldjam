@@ -13,6 +13,7 @@ use bevy::{
 };
 
 
+use gamestate::gen_valid_moves;
 use rand::Rng;
 
 use std::{f32::consts::PI, time::Duration};
@@ -267,7 +268,7 @@ fn setup(
     //     } ));
 
 
-    
+
     // cursor with no cube
     commands.spawn((GameCursor { ndx : 0, 
             drag_from : None, _drag_dest : None, cursor_world : Vec3::ZERO, split_pct : 0.5,
@@ -369,7 +370,7 @@ fn setup(
 
 
     commands.spawn( AIController {
-        turn_timer : Timer::new(Duration::from_secs_f32( 2.0 ), TimerMode::Once),        
+        turn_timer : Timer::new(Duration::from_secs_f32( 3.0 ), TimerMode::Once),        
     });
 
 
@@ -412,8 +413,8 @@ fn setup(
     // setup player status
     stuff.player_stuff[0].ptype = PlayerType::Local;
     stuff.player_stuff[1].ptype = PlayerType::AI;
-    stuff.player_stuff[2].ptype = PlayerType::Local;
-    stuff.player_stuff[3].ptype = PlayerType::Local;
+    stuff.player_stuff[2].ptype = PlayerType::AI;
+    stuff.player_stuff[3].ptype = PlayerType::NotActive;
 
 }
 
@@ -964,6 +965,7 @@ fn update_ai(
     stuff: Res<GoodStuff>,
     mut q_ai : Query<&mut AIController>,
     mut ev_turn: EventWriter<TurnAdvance>,    
+    mut ev_gamestate: EventWriter<GameStateChanged>,
     mut game: ResMut<GameState>, 
 ) {
     let pinfo = &stuff.player_stuff[game.player_turn as usize];
@@ -973,12 +975,48 @@ fn update_ai(
             ai.turn_timer.tick( time.delta());
             if ai.turn_timer.finished() {
                 // Take AI Turn
-                // TODO
+                let moves = gen_valid_moves( game.snapshot, game.player_turn as usize);
+                if (moves.is_empty()) {
+                    println!("AI has no valid moves and will pass.");
+                } else {
+                    println!("AI has {} valid moves", moves.len() );
+                    // Choose a move a random
+                    let mut rng = rand::thread_rng();
+                    
+                    let old = game.snapshot;
+                    game.snapshot = moves[ rng.gen_range( 0..moves.len())];
+
+                    // check for splits by looking for decrease
+                    let mut split_ndx = None;
+                    for mapsq in &game.snapshot.map {
+                        let oldsq = old.map.spaces[ mapsq.ndx as usize ];
+                        if (oldsq.power > mapsq.power) {                            
+                            split_ndx = Some( mapsq.ndx );
+                            break;
+                        }
+                    }                    
+
+                    // Send any adds
+                    for mapsq in &game.snapshot.map {
+                        let oldsq = old.map.spaces[ mapsq.ndx as usize ];
+                        if (oldsq.power != mapsq.power) {
+                            if split_ndx.is_none() || oldsq.power > mapsq.power {                                
+                                ev_gamestate.send( GameStateChanged::CircleAdded( mapsq.ndx ) );
+                            } else {
+                                ev_gamestate.send( GameStateChanged::CircleSplit( split_ndx.unwrap(), mapsq.ndx ) );
+                            }
+                            
+                            
+                        }
+                    }
+                }
 
                 // Reset turn timer
                 ai.turn_timer.reset();
+                ai.turn_timer.set_duration( Duration::from_secs_f32( 0.15 ) );
 
                 // Advance to the next player's turn
+                // todo Wrap this logic up
                 let mut pnum = game.player_turn;
                 loop {
                     pnum = pnum + 1;
