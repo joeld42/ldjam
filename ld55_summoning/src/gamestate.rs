@@ -51,6 +51,25 @@ pub struct GameSnapshot
     pub score : [ i32; 4],
 }
 
+impl GameSnapshot {
+    pub fn calc_simple_score( &self, player : i32 ) -> i32
+    {
+        let mut score = 0;
+        for mapsq in &self.map {
+            if mapsq.power > 0 && mapsq.player == (player + 1) as u8 {
+                score += 1;
+            }
+        }
+        score
+    }
+
+    pub fn update_scores( &mut self ) {
+        for i in 0..4 {
+            self.score[i] = self.calc_simple_score( i as i32 );
+        }
+    }
+}
+
 
 pub const MAP_SZ : usize = 10;
 pub const INVALID : usize = 9999;

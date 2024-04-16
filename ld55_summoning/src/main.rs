@@ -5,10 +5,7 @@ use bevy::{
         //bloom::{BloomCompositeMode, BloomSettings},
         bloom::BloomSettings,
         tonemapping::Tonemapping,
-    },
-    pbr::NotShadowCaster,
-    prelude::*,    
-    render::{mesh::VertexAttributeValues, texture::{ImageAddressMode, ImageSamplerDescriptor}}, window::WindowResized,
+    }, input::keyboard::Key, pbr::NotShadowCaster, prelude::*, render::{mesh::VertexAttributeValues, texture::{ImageAddressMode, ImageSamplerDescriptor}}, window::WindowResized
 
 };
 
@@ -68,6 +65,10 @@ enum GameStateChanged {
 #[derive(Event)]
 struct TurnAdvance(i32); 
 
+#[derive(Event)]
+struct PlayerSettingsChanged; 
+
+// FIXME: this should be a singleton component and not a resource
 #[derive(Resource)]
 struct GameState {
     //map : GameMap,
@@ -75,7 +76,8 @@ struct GameState {
     map_visuals: Vec<Entity>,
     player_count : i32,
     player_turn : i32,
-    turn_num : i32,
+    turn_num : i32,    
+    round_scoring_finished : bool,
 }
 
 impl Default for GameState {
@@ -85,7 +87,8 @@ impl Default for GameState {
             map_visuals: Vec::new(),
             player_count: 0,
             player_turn: 0,
-            turn_num: 0
+            turn_num: 0,
+            round_scoring_finished : true,
         }
     }
 }
@@ -103,10 +106,20 @@ struct PlayerHelp;
 struct RoundScoringFrame;
 
 #[derive(Component)]
+struct TitleScreenCrap;
+
+#[derive(Component)]
 struct RoundIcon(i32);
 
 #[derive(Component)]
 struct TurnIcon(i32);
+
+#[derive(Component)]
+struct PlayerScore(i32);
+
+#[derive(Component)]
+struct PlayerSetting(i32);
+
 
 #[derive(Component)]
 struct CircleAnimator {
@@ -164,7 +177,8 @@ fn main() {
         .insert_resource( GoodStuff::default() )
         .insert_resource( GameState::default() )
         .add_systems(Startup, setup)
-        .add_systems(Startup, build_map )                
+        //.add_systems(Startup, build_map )                                
+        .add_systems(Update, build_map )                                
         .add_systems( Update, handle_input )
         .add_systems( Update, on_gamestate_changed )
         .add_systems( Update, draw_split_feedback )
@@ -172,8 +186,10 @@ fn main() {
         .add_systems( Update, update_ai )
         .add_systems( Update, update_circ_anim )
         .add_systems( Update, update_ui )
+        .add_systems( Update, player_settings )
         .add_event::<GameStateChanged>()
         .add_event::<TurnAdvance>()
+        .add_event::<PlayerSettingsChanged>()
         .run();
 }
 
@@ -186,6 +202,7 @@ fn setup(
     //mut cards: ResMut<CardDeck>,
     mut stuff: ResMut<GoodStuff>,
     mut config_store: ResMut<GizmoConfigStore>,
+    mut ev_settings: EventWriter<PlayerSettingsChanged>,
     //game: Res<GameState>,
     asset_server: Res<AssetServer>
 ) {
@@ -194,6 +211,14 @@ fn setup(
     // set up gizmos
     let (config, _) = config_store.config_mut::<DefaultGizmoConfigGroup>();
     config.line_width *= 2.0;
+
+
+    // MUUUUSSSIICC 
+    commands.spawn(AudioBundle {
+        source: asset_server.load("SummoningStuff_OGG.ogg"),
+        settings: PlaybackSettings::LOOP,
+        ..default()
+    });
 
     // circular base
     let mut plane_mesh = Mesh::from( Plane3d { normal: Direction3d::Y } )
@@ -428,11 +453,41 @@ fn setup(
     //     ..default()
     // });
 
+    commands.spawn((SpriteBundle {
+        texture: asset_server.load("title.png"),
+        transform: Transform::from_xyz( 0.0, 0.0, 3.0 ).with_scale( Vec3::splat( 0.6)),
+        ..default()
+    }, TitleScreenCrap ));
+
     // setup player status
-    stuff.player_stuff[0].ptype = PlayerType::AI;
+    stuff.player_stuff[0].ptype = PlayerType::Local;
     stuff.player_stuff[1].ptype = PlayerType::AI;
     stuff.player_stuff[2].ptype = PlayerType::AI;
-    stuff.player_stuff[3].ptype = PlayerType::AI;
+    stuff.player_stuff[3].ptype = PlayerType::NotActive;
+
+    let mut yy = 440.0;
+    for i in 0..4 {
+        
+            commands.spawn((
+                TextBundle::from_section("Player # -- ???",
+                    TextStyle {
+                        color: stuff.player_stuff[i].color,
+                        font_size: 30.,
+                        ..default()
+                    },
+                )
+                .with_style(Style {
+                    position_type: PositionType::Absolute,
+                    top: Val::Px(yy),
+                    left: Val::Px( 550.0),                
+                    ..default()
+                }),                
+                PlayerSetting(i as i32),
+                TitleScreenCrap) );
+            yy += 30.0;        
+    }
+
+    ev_settings.send( PlayerSettingsChanged );
     
 
     commands.spawn((SpriteBundle {
@@ -460,13 +515,51 @@ fn setup(
                     ..default()
                 }, TurnIcon(i*4 + j)));
             }
-
         }
     });
+
+    let mut xx = 12.0;
+    for i in 0..4 {
+        //if (stuff.player_stuff[i].ptype != PlayerType::NotActive)
+        //{
+            commands.spawn((
+                TextBundle::from_section("0",
+                    TextStyle {
+                        color: stuff.player_stuff[i].color,
+                        font_size: 42.,
+                        ..default()
+                    },
+                )
+                .with_style(Style {
+                    position_type: PositionType::Absolute,
+                    top: Val::Px(xx),
+                    left: Val::Px(12.0),                
+                    ..default()
+                }),
+                PlayerScore( i as i32),
+            ));
+
+            xx += 50.0;
+        //}
+    }
     
 
 }
 
+
+// fn test_start_game ( 
+//     // mut world : &mut World,
+//     mut commands: Commands,            
+//     keyboard_input: Res<ButtonInput<KeyCode>>,
+// )
+// {
+//     if keyboard_input.just_pressed( KeyCode::KeyW ) {
+//         println!("W pressed");
+//         //world.run_system_once(build_map);
+//     }
+// }
+
+// world.run_system_once(count_entities);
 // fn spawn_cards ( 
 //     mut commands: Commands,        
 //     cards: Res<CardDeck>,
@@ -628,6 +721,8 @@ fn handle_input(
                             }
                             game.player_turn = pnum;
                             game.turn_num += 1;
+
+                            game.snapshot.update_scores();
 
                             ev_turn.send( TurnAdvance(pnum) );
                         }
@@ -805,15 +900,75 @@ fn worldpos_from_mapindex( mapindex : i32 ) -> Vec3
 
 fn build_map (
     asset_server: Res<AssetServer>,
-    stuff: Res<GoodStuff>,
+    mut stuff: ResMut<GoodStuff>,
     mut commands: Commands,
     mut gamestate: ResMut<GameState>,
     mut meshes: ResMut<Assets<Mesh>>,    
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut ev_gamestate: EventWriter<GameStateChanged>,
     mut ev_turn: EventWriter<TurnAdvance>,
+    mut ev_settings: EventWriter<PlayerSettingsChanged>,
+    titlescreen_q : Query<Entity, With<TitleScreenCrap>>,    
+    keyboard_input: Res<ButtonInput<KeyCode>>,
 ) 
-{    
+{   
+
+    // already built
+    if (gamestate.player_count > 0) {
+        return;
+    }
+
+    // this all sucks but the contest is ending
+    if (gamestate.player_count == 0) {
+
+        let mut should_run = keyboard_input.just_pressed( KeyCode::Enter ) || keyboard_input.just_pressed( KeyCode::Space );
+
+
+        let mut z = -1;
+        if keyboard_input.just_pressed( KeyCode::Digit1) {
+            z = 0;
+        }
+        
+        if keyboard_input.just_pressed( KeyCode::Digit2) {
+            z = 1;
+        }
+
+        if keyboard_input.just_pressed( KeyCode::Digit3) {
+            z = 2;
+        }
+
+        if keyboard_input.just_pressed( KeyCode::Digit4) {
+            z = 3;
+        }
+
+        if z >= 0 {
+            let z = z as usize;
+            if stuff.player_stuff[z].ptype == PlayerType::Local {
+                stuff.player_stuff[z].ptype = PlayerType::AI;
+            } else if stuff.player_stuff[z].ptype == PlayerType::AI {
+                stuff.player_stuff[z].ptype = PlayerType::NotActive;
+            } else if stuff.player_stuff[z].ptype == PlayerType::NotActive {
+                stuff.player_stuff[z].ptype = PlayerType::Local;
+            }
+
+            ev_settings.send( PlayerSettingsChanged );
+        }
+
+        let mut pcount : i32 = 0;
+        for i in 0..4 {
+            if stuff.player_stuff[i].ptype != PlayerType::NotActive {
+                pcount += 1;
+            }
+        }
+
+        if !should_run || pcount == 0 { return };
+    }
+
+    // Despawn all the title screen stuff
+    for e in &titlescreen_q {
+        commands.entity(e).despawn_recursive();
+    }
+
     // Count number of active players to get target size for map
     let mut player_count = 0;
     for i in 0..stuff.player_stuff.len() {
@@ -935,6 +1090,28 @@ fn build_map (
 
 }
 
+fn player_settings(     
+    mut stuff: ResMut<GoodStuff>,
+    mut setting_q: Query<(&mut Text, &PlayerSetting)>,
+    mut ev_settings: EventReader<PlayerSettingsChanged>,
+) {
+    for ev in ev_settings.read() {
+
+        for (mut text, plr) in &mut setting_q {
+            
+            let plrType = match stuff.player_stuff[plr.0 as usize].ptype {
+                PlayerType::Local => "Human",
+                PlayerType::AI => "AI",
+                PlayerType::NotActive => "None",
+            };
+
+            text.sections[0].value = format!("Player {} -- {}", plr.0 + 1, plrType);
+        }
+
+    }
+
+}
+
 
 fn player_guidance( 
     //mut commands: Commands,
@@ -943,6 +1120,7 @@ fn player_guidance(
     //mut helper_q: Query<(&mut Text, &mut Style), With<PlayerHelp>>,        
     mut helper_q: Query<&mut Text, With<PlayerHelp>>,        
     mut turnicon_q: Query<(&mut Sprite, &TurnIcon)>,        
+    mut score_q: Query<(&mut Text, &PlayerScore), Without<PlayerHelp>>,        
     mut ev_turn: EventReader<TurnAdvance>, ) 
 {
     for ev in ev_turn.read() {
@@ -970,14 +1148,23 @@ fn player_guidance(
             }
         }
 
-        let icon_n = game.turn_num / game.player_count;
-        for (mut sprite, turn) in &mut turnicon_q {
-            if turn.0 < icon_n {
-                sprite.color = Color::rgba( 1.0, 1.0, 1.1, 0.3 );
-            } else if turn.0 == icon_n {
-                sprite.color = pinfo.color;
+        if game.player_count > 0 {
+            let icon_n = game.turn_num / game.player_count;
+            for (mut sprite, turn) in &mut turnicon_q {
+                if turn.0 < icon_n {
+                    sprite.color = Color::rgba( 1.0, 1.0, 1.1, 0.3 );
+                } else if turn.0 == icon_n {
+                    sprite.color = pinfo.color;
+                }
+            }
+
+            // Update score displays
+            for (mut text, score) in &mut score_q {
+                text.sections[0].value = format!( "{:02}", game.snapshot.score[ score.0 as usize ]);
+
             }
         }
+
     }
 }
 
@@ -1148,6 +1335,9 @@ fn update_ai(
         }
         game.player_turn = pnum;
         game.turn_num += 1;
+
+        game.snapshot.update_scores();
+
         ev_turn.send( TurnAdvance(pnum) );
     }
 
@@ -1156,6 +1346,7 @@ fn update_ai(
 fn update_ui( 
     _time: Res<Time>,
     mut scoreframe_q : Query<&mut Transform, With<RoundScoringFrame>>,
+    mut helper_q: Query<(&mut Style), (With<PlayerHelp>,Without<RoundScoringFrame>)>,        
     mut ev_window: EventReader<WindowResized>,
  )
 {
@@ -1164,6 +1355,9 @@ fn update_ui(
         println!("Window resized {} {}", ev.width, ev.height );
         let mut xform = scoreframe_q.single_mut();
         xform.translation = Vec3 { x : (ev.width - 177.0) /2.0, y : 0.0, z : 1.0 };
+
+        let mut style = helper_q.single_mut();
+        style.top = Val::Px( ev.height - 30.0);
     }
 }
 
