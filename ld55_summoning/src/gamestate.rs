@@ -298,3 +298,56 @@ pub fn gen_valid_moves( gamecurr : GameSnapshot, for_player : usize ) -> Vec<Gam
 
     result
 }
+
+pub fn evaluate_position(snap:GameSnapshot) -> [i32;4]{
+    //let mut result = Vec::new();
+    let mut accessMap : [ i32 ; 100]=[0; 100];
+    let mut evalScore:[i32;4]=[0; 4];
+    for hex in &snap.map{
+        if hex.power>1{
+            let player=1<<(hex.player-1);
+            let index=hex.ndx;
+            for mapdir in MapDirection::iterator() {
+                let targetIndex=snap.map.search_dir( index, mapdir );
+                if index != targetIndex{
+                    accessMap[targetIndex as usize]|=player;
+                }
+            }
+        }
+    }
+    for hex in &snap.map{
+        if hex.power>0{
+            let mut weight:i32=10000;
+            if hex.power>1{
+                let player=1<<(hex.player-1);
+                let notPlayer=!player;
+                let index=hex.ndx;
+                let movepower:i32=((hex.power-1) as i32)*10000;
+                let mut opportunity:i32=0;
+                for mapdir in MapDirection::iterator() {
+                    let mut cHex=hex.ndx;
+                    let mut distancefactor:i32=10000;
+                    loop{
+                        cHex = move_dir( cHex, mapdir);
+                        if(cHex as usize == INVALID) || (snap.map.spaces[cHex as usize].contents != MapSpaceContents::Playable) || (snap.map.spaces[cHex as usize].power != 0){
+                            break;
+                        }
+                        if (accessMap[cHex as usize] & notPlayer)==0{
+                            distancefactor*=9;
+                        }
+                        else{
+                            distancefactor*=5;
+                        }
+                        distancefactor/=10;
+                        opportunity+=distancefactor;
+                    }
+                }
+                if opportunity>0{
+                    weight+=1000000000/((1000000000/movepower)+(1000000000/opportunity));
+                }
+            }
+            evalScore[(hex.player-1) as usize]+=weight;
+        }
+    }
+    evalScore
+}
