@@ -11,6 +11,7 @@ use bevy::{
 
 
 use gamestate::gen_valid_moves;
+use gamestate::evaluate_position;
 use rand::Rng;
 use rand::seq::SliceRandom;
 
@@ -1280,6 +1281,23 @@ fn update_ai(
                     
                     let old = game.snapshot;
                     game.snapshot = moves[ rng.gen_range( 0..moves.len())];
+                    let mut currentStrength:i32=-1000000000;
+                    for cMove in moves{
+                        let playerEvals=evaluate_position(cMove);
+                        let mut newStrength:i32=rng.gen_range( 0..1000);
+                        for player in 0..4{
+                            if player==game.player_turn{
+                                newStrength+=playerEvals[player as usize]*(game.player_count-1);
+                            }
+                            else{
+                                newStrength-=playerEvals[player as usize];
+                            }
+                        }
+                        if(newStrength>currentStrength){
+                            currentStrength=newStrength;
+                            game.snapshot=cMove;
+                        }
+                    }
 
                     // check for splits by looking for decrease
                     let mut split_ndx = None;
