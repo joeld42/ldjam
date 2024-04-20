@@ -17,10 +17,12 @@ pub mod gamestate;
 pub mod titlescreen;
 
 use gamestate::gen_valid_moves;
+<<<<<<< Updated upstream
 use gamestate::evaluate_position;
-
+=======
 use titlescreen::TitleScreenPlugin;
 
+>>>>>>> Stashed changes
 use rand::Rng;
 use rand::seq::SliceRandom;
 
@@ -1296,22 +1298,21 @@ fn update_ai(
 
                     let old = game.snapshot;
                     game.snapshot = moves[ rng.gen_range( 0..moves.len())];
-
-                    let mut curr_strength:i32=-1000000000;
-                    for curr_move in moves{
-                        let plyr_evals=evaluate_position(curr_move);
-                        let mut new_str:i32=rng.gen_range( 0..1000);
+                    let mut currentStrength:i32=-1000000000;
+                    for cMove in moves{
+                        let playerEvals=evaluate_position(cMove);
+                        let mut newStrength:i32=rng.gen_range( 0..1000);
                         for player in 0..4{
                             if player==game.player_turn{
-                                new_str+=plyr_evals[player as usize]*(game.player_count-1);
+                                newStrength+=playerEvals[player as usize]*(game.player_count-1);
                             }
                             else{
-                                new_str-=plyr_evals[player as usize];
+                                newStrength-=playerEvals[player as usize];
                             }
                         }
-                        if(new_str>curr_strength){
-                            curr_strength=new_str;
-                            game.snapshot=curr_move;
+                        if(newStrength>currentStrength){
+                            currentStrength=newStrength;
+                            game.snapshot=cMove;
                         }
                     }
 

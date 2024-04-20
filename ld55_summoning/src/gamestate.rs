@@ -14,12 +14,12 @@ pub enum MapDirection {
     NorthWest,
     South,
     SouthWest,
-    SouthEast    
+    SouthEast
 }
 
 impl MapDirection {
     pub fn iterator() -> impl Iterator<Item = MapDirection> {
-        [ MapDirection::North, MapDirection::NorthEast, MapDirection::SouthEast, 
+        [ MapDirection::North, MapDirection::NorthEast, MapDirection::SouthEast,
         MapDirection::South, MapDirection::SouthWest, MapDirection::NorthWest ].iter().copied()
     }
 }
@@ -81,7 +81,7 @@ pub fn map_index( row : i32, col : i32 ) -> i32
         INVALID as i32
     } else {
         (row * (MAP_SZ as i32)) + col
-    }    
+    }
 }
 
 pub fn move_dir( ndx : i32, dir : MapDirection ) -> i32
@@ -100,7 +100,7 @@ pub fn move_dir( ndx : i32, dir : MapDirection ) -> i32
             MapDirection::SouthWest => map_index( row - 1, col - 1 ),
             MapDirection::SouthEast => map_index( row - 1, col + 1 ),
         }
-        
+
     } else {
         // Even Col
         match dir {
@@ -116,18 +116,18 @@ pub fn move_dir( ndx : i32, dir : MapDirection ) -> i32
 
 impl GameMap {
      pub fn search_dir( &self, ndx : i32, dir : MapDirection ) -> i32 {
-        
-        let mut curr = ndx;        
+
+        let mut curr = ndx;
         loop {
             let last = curr;
             curr = move_dir( curr, dir);
-            if  (curr == INVALID as i32) || 
+            if  (curr == INVALID as i32) ||
                 ( self.spaces[curr as usize].contents != MapSpaceContents::Playable ) ||
                 ( self.spaces[curr as usize].power != 0 ) {
                     // if this space is filled or blocked
                     return last;
                  }
-        }        
+        }
      }
 
      pub fn neighbors( &self, ndx : i32, valid_only : bool ) -> Vec::<i32> {
@@ -188,7 +188,7 @@ impl GameMap {
 
     pub fn check_reachability( &self ) -> bool {
 
-        let mut reachable: [bool; MAP_SZ * MAP_SZ] = [false; MAP_SZ * MAP_SZ];        
+        let mut reachable: [bool; MAP_SZ * MAP_SZ] = [false; MAP_SZ * MAP_SZ];
 
         // flood fill check that map_copy is still reachable from everywhere
         for i in 0..self.spaces.len() {
@@ -202,7 +202,7 @@ impl GameMap {
         let mut changed = true;
         while changed {
 
-            changed = false;            
+            changed = false;
             for i in 0..self.spaces.len() {
                 if self.spaces[i].contents == MapSpaceContents::Playable &&
                    !reachable[i] {
@@ -215,11 +215,11 @@ impl GameMap {
                             break;
                         }
                     }
-                }                
-            }            
+                }
+            }
         }
 
-        // check reachability        
+        // check reachability
         for i in 0..self.spaces.len() {
             // start on any playable space
             if !reachable[i] && self.spaces[i].contents == MapSpaceContents::Playable {
@@ -237,7 +237,7 @@ impl Default for GameMap {
     fn default() -> GameMap {
         GameMap {
             spaces : [ MapSpace::default(); MAP_SZ*MAP_SZ ],
-        }        
+        }
     }
 }
 
@@ -281,13 +281,13 @@ pub fn gen_valid_moves( gamecurr : GameSnapshot, for_player : usize ) -> Vec<Gam
     }
 
     for (start_ndx, move_ndx) in split_squares {
-        // can move from start_ndx to move_ndx                
+        // can move from start_ndx to move_ndx
         let start_ndx = start_ndx as usize;
         let move_ndx = move_ndx as usize;
 
         for amt in 1..gamecurr.map.spaces[start_ndx].power
         {
-            let mut next : GameSnapshot = gamecurr;            
+            let mut next : GameSnapshot = gamecurr;
             next.map.spaces[start_ndx].power -= amt;
             next.map.spaces[move_ndx].power += amt;
             next.map.spaces[move_ndx].player = (for_player + 1) as u8;
@@ -301,16 +301,16 @@ pub fn gen_valid_moves( gamecurr : GameSnapshot, for_player : usize ) -> Vec<Gam
 
 pub fn evaluate_position(snap:GameSnapshot) -> [i32;4]{
     //let mut result = Vec::new();
-    let mut accessMap : [ i32 ; 100]=[0; 100];
-    let mut evalScore:[i32;4]=[0; 4];
+    let mut access_map : [ i32 ; 100]=[0; 100];
+    let mut eval_score:[i32;4]=[0; 4];
     for hex in &snap.map{
         if hex.power>1{
             let player=1<<(hex.player-1);
             let index=hex.ndx;
             for mapdir in MapDirection::iterator() {
-                let targetIndex=snap.map.search_dir( index, mapdir );
-                if index != targetIndex{
-                    accessMap[targetIndex as usize]|=player;
+                let target_index=snap.map.search_dir( index, mapdir );
+                if index != target_index{
+                    access_map[target_index as usize]|=player;
                 }
             }
         }
@@ -320,19 +320,19 @@ pub fn evaluate_position(snap:GameSnapshot) -> [i32;4]{
             let mut weight:i32=10000;
             if hex.power>1{
                 let player=1<<(hex.player-1);
-                let notPlayer=!player;
+                let not_player=!player;
                 let index=hex.ndx;
                 let movepower:i32=((hex.power-1) as i32)*10000;
                 let mut opportunity:i32=0;
                 for mapdir in MapDirection::iterator() {
-                    let mut cHex=hex.ndx;
+                    let mut curr_hex=hex.ndx;
                     let mut distancefactor:i32=10000;
                     loop{
-                        cHex = move_dir( cHex, mapdir);
-                        if(cHex as usize == INVALID) || (snap.map.spaces[cHex as usize].contents != MapSpaceContents::Playable) || (snap.map.spaces[cHex as usize].power != 0){
+                        curr_hex = move_dir( curr_hex, mapdir);
+                        if(curr_hex as usize == INVALID) || (snap.map.spaces[curr_hex as usize].contents != MapSpaceContents::Playable) || (snap.map.spaces[curr_hex as usize].power != 0){
                             break;
                         }
-                        if (accessMap[cHex as usize] & notPlayer)==0{
+                        if (access_map[curr_hex as usize] & not_player)==0{
                             distancefactor*=9;
                         }
                         else{
@@ -346,8 +346,8 @@ pub fn evaluate_position(snap:GameSnapshot) -> [i32;4]{
                     weight+=1000000000/((1000000000/movepower)+(1000000000/opportunity));
                 }
             }
-            evalScore[(hex.player-1) as usize]+=weight;
+            eval_score[(hex.player-1) as usize]+=weight;
         }
     }
-    evalScore
+    eval_score
 }
