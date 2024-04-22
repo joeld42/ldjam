@@ -16,6 +16,8 @@ pub mod summongame;
 pub mod gamestate;
 pub mod titlescreen;
 
+use summongame::GameAppState;
+
 use gamestate::gen_valid_moves;
 use gamestate::evaluate_position;
 
@@ -186,6 +188,7 @@ fn main() {
         .add_plugins(
             TitleScreenPlugin
         )
+        .init_state::<GameAppState>()
         //.insert_resource( CardDeck::default() )
         .insert_resource( GoodStuff::default() )
         .insert_resource( GameState::default() )
