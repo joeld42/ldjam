@@ -8,6 +8,3 @@ pub enum GameAppState {
     TitleScreen,
     Gameplay,
 }
-
-#[derive(Component)]
-pub struct DontDeleteOnAppStateChange;

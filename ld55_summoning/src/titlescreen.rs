@@ -1,8 +1,10 @@
 use bevy::prelude::*;
-use crate::summongame::{GameAppState, DontDeleteOnAppStateChange};
+use crate::summongame::GameAppState;
 
 
-// Rest of the code
+#[derive(Component)]
+pub struct TitleScreenCleanup;
+
 
 pub struct TitleScreenPlugin;
 
@@ -35,9 +37,10 @@ fn title_setup( mut commands: Commands ) {
             left: Val::Px(12.0),
             ..default()
         }),
+        TitleScreenCleanup,
     ));
 
-    commands.spawn((
+    commands.spawn(
         TextBundle::from_section(
             "Dont Delete Me",
             TextStyle {
@@ -51,8 +54,8 @@ fn title_setup( mut commands: Commands ) {
             top: Val::Px(30.0),
             left: Val::Px(12.0),
             ..default()
-        }), DontDeleteOnAppStateChange
-    ));
+        })
+    );
 
 }
 
@@ -72,10 +75,10 @@ fn title_update (
 
 fn title_teardown(
     mut commands: Commands,
-    despawn_q: Query<Entity, Without<DontDeleteOnAppStateChange>>) {
+    despawn_q: Query<Entity, With<TitleScreenCleanup>>) {
     println!("Title screen teardown!");
 
-    // for entity in &despawn_q {
-    //     commands.entity(entity).despawn_recursive();
-    // }
+    for entity in &despawn_q {
+        commands.entity(entity).despawn_recursive();
+    }
 }

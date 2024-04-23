@@ -16,7 +16,7 @@ pub mod summongame;
 pub mod gamestate;
 pub mod titlescreen;
 
-use summongame::GameAppState;
+use crate::summongame::GameAppState;
 
 use gamestate::gen_valid_moves;
 use gamestate::evaluate_position;
@@ -184,11 +184,15 @@ fn main() {
         .add_systems(Startup, setup)
         .add_systems( OnEnter(GameAppState::Gameplay), setup_gameplay )
         .add_systems(Update, build_map )
-        .add_systems( Update, handle_input )
+        //.add_systems( Update, handle_input )
         .add_systems( Update, on_gamestate_changed )
-        .add_systems( Update, draw_split_feedback )
+        //.add_systems( Update, draw_split_feedback )
+        .add_systems(Update, (
+            handle_input, 
+            draw_split_feedback, 
+            update_ai).run_if(in_state(GameAppState::Gameplay)))
         .add_systems( Update, player_guidance )
-        .add_systems( Update, update_ai )
+        //.add_systems( Update, update_ai )
         .add_systems( Update, update_circ_anim )
         .add_systems( Update, update_ui )
         .add_systems( Update, player_settings )
@@ -252,7 +256,7 @@ fn setup(
          transform: Transform::from_scale(Vec3::new(10.0, 10.0, 10.0)),
         //     Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)).with_scale( Vec3::new(4.0, 4.0, 4.0) ),
         ..default()
-    }, Ground ));
+    }, Ground) );
 
 
     // Stuff for summoning circles
@@ -298,13 +302,7 @@ fn setup(
             stuff.player_stuff[p].ring_mtl[i - 1] = materials.add(ring_mtl);
         }
     }
-
-
-    // cursor with no cube
-    commands.spawn((GameCursor { ndx : 0,
-            drag_from : None, _drag_dest : None, cursor_world : Vec3::ZERO, split_pct : 0.5,
-            }, Transform::default() ));
-
+    
     // light
     commands.spawn(PointLightBundle {
         point_light: PointLight {
@@ -368,45 +366,17 @@ fn setup(
     ));
 
 
-    commands.spawn( AIController {
-        turn_timer : Timer::new(Duration::from_secs_f32( 3.0 ), TimerMode::Once),
-    });
 
 
     // 2D scene -------------------------------
-    commands.spawn(Camera2dBundle {
+    commands.spawn( Camera2dBundle {
         camera: Camera {
             hdr: true,
             order: 2, // Draw sprites on top of 3d world
             ..default()
         },
         ..default()
-    });
-
-    // Load card atlas
-    // let texture = asset_server.load("cardfish_cards.png");
-    // let layout = TextureAtlasLayout::from_grid(
-    //     Vec2::new( 567.0*(256.0/811.0), 256.0), 11, 2, None, None);
-    // let texture_atlas_layout = texture_atlas_layouts.add(layout);
-
-    // cards.texture = texture;
-    // cards.layout = texture_atlas_layout;
-
-    // commands.spawn((
-    //     SpriteSheetBundle {
-    //         texture,
-    //         atlas: TextureAtlas {
-    //             layout: texture_atlas_layout,
-    //             index: 0,
-    //         },
-    //         ..default()
-    //     },
-    // ));
-
-    // commands.spawn(SpriteBundle {
-    //     texture: asset_server.load("bevy_bird_dark.png"),
-    //     ..default()
-    // });
+    } );
 
     commands.spawn((SpriteBundle {
         texture: asset_server.load("title.png"),
@@ -521,6 +491,16 @@ fn setup_gameplay (
 )
 {
     println!("Hello from setup gameplay");
+
+    // cursor with no cube
+    commands.spawn((GameCursor { ndx : 0,
+        drag_from : None, _drag_dest : None, cursor_world : Vec3::ZERO, split_pct : 0.5,
+        }, Transform::default() ));
+
+    commands.spawn( AIController {
+        turn_timer : Timer::new(Duration::from_secs_f32( 3.0 ), TimerMode::Once),
+    });
+    
 
     build_hud(&mut commands, stuff);
 }
