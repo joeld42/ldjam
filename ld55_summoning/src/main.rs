@@ -16,7 +16,7 @@ pub mod summongame;
 pub mod gamestate;
 pub mod titlescreen;
 
-use crate::summongame::GameAppState;
+use crate::summongame::{ GameAppState, PlayerType, GoodStuff };
 
 use gamestate::gen_valid_moves;
 use gamestate::evaluate_position;
@@ -32,41 +32,7 @@ use std::{f32::consts::PI, time::Duration};
 use crate::gamestate::{GameSnapshot, MapDirection, INVALID};
 use crate::gamestate::MapSpaceContents;
 
-
 const HEX_SZ : f32 = 1.0;
-
-// #[derive(Resource,Default)]
-// struct CardDeck {
-//     texture: Handle<Image>,
-//     layout: Handle<TextureAtlasLayout>,
-
-//     // todo: card stats, etc
-// }
-
-#[derive(Default, PartialEq)]
-enum PlayerType {
-    Local,
-    AI, // AI(AIPolicy)
-    #[default]
-    NotActive
-}
-
-#[derive(Default)]
-struct PlayerStuff
-{
-    color: Color,
-    color2 : Color,
-    ring_mtl: [ Handle<StandardMaterial>; 21 ],
-    ptype : PlayerType,
-    out_of_moves : bool,
-}
-
-// Resource  stuff
-#[derive(Resource,Default)]
-struct GoodStuff {
-    ring_mesh: Handle<Mesh>,
-    player_stuff : [ PlayerStuff ; 4],
-}
 
 #[derive(Event)]
 enum GameStateChanged {
@@ -77,8 +43,6 @@ enum GameStateChanged {
 #[derive(Event)]
 struct TurnAdvance(i32);
 
-#[derive(Event)]
-struct PlayerSettingsChanged;
 
 // FIXME: this should be a singleton component and not a resource
 #[derive(Resource)]
@@ -113,15 +77,7 @@ struct GameCamera;
 struct PlayerHelp;
 
 #[derive(Component)]
-struct TitleScreenCrap;
-
-
-#[derive(Component)]
 struct PlayerScore(i32);
-
-#[derive(Component)]
-struct PlayerSetting(i32);
-
 
 #[derive(Component)]
 struct CircleAnimator {
@@ -182,23 +138,23 @@ fn main() {
         .insert_resource( GoodStuff::default() )
         .insert_resource( GameState::default() )
         .add_systems(Startup, setup)
-        .add_systems( OnEnter(GameAppState::Gameplay), setup_gameplay )
-        .add_systems(Update, build_map )
-        //.add_systems( Update, handle_input )
-        .add_systems( Update, on_gamestate_changed )
-        //.add_systems( Update, draw_split_feedback )
+        
+        .add_systems( OnEnter(GameAppState::Gameplay), (
+            setup_gameplay, 
+            build_map) )        
+        
         .add_systems(Update, (
             handle_input, 
             draw_split_feedback, 
+            on_gamestate_changed,
+            player_guidance,
+            update_circ_anim,
+            update_ui,
             update_ai).run_if(in_state(GameAppState::Gameplay)))
-        .add_systems( Update, player_guidance )
-        //.add_systems( Update, update_ai )
-        .add_systems( Update, update_circ_anim )
-        .add_systems( Update, update_ui )
-        .add_systems( Update, player_settings )
+        
         .add_event::<GameStateChanged>()
         .add_event::<TurnAdvance>()
-        .add_event::<PlayerSettingsChanged>()
+        
         .run();
 }
 
@@ -207,56 +163,14 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    //mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
-    //mut cards: ResMut<CardDeck>,
     mut stuff: ResMut<GoodStuff>,
-    mut config_store: ResMut<GizmoConfigStore>,
-    mut ev_settings: EventWriter<PlayerSettingsChanged>,
-    //game: Res<GameState>,
+    mut config_store: ResMut<GizmoConfigStore>,        
     asset_server: Res<AssetServer>
 ) {
-
 
     // set up gizmos
     let (config, _) = config_store.config_mut::<DefaultGizmoConfigGroup>();
     config.line_width *= 2.0;
-
-
-    // circular base
-    let mut plane_mesh = Mesh::from( Plane3d { normal: Direction3d::Y } )
-                    .with_generated_tangents().unwrap();
-
-    // scale the UVs
-    let uvs = plane_mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0).unwrap();
-    let uvscale = 3.0;
-    match uvs {
-        VertexAttributeValues::Float32x2(values) => {
-            for uv in values.iter_mut() {
-                uv[0] *= uvscale;
-                uv[1] *= uvscale;
-            }
-        },
-        _ => (),
-    };
-
-    commands.spawn((PbrBundle {
-        //mesh: meshes.add(Circle::new(4.0)),
-        mesh: meshes.add( plane_mesh ),
-        material: materials.add( StandardMaterial{
-            base_color_texture: Some( asset_server.load("tx_hextest/Hex Test_BaseColor-256x256.PNG") ),
-            normal_map_texture: Some( asset_server.load("tx_hextest/Hex Test_Normal-256x256.PNG") ),
-            emissive: Color::WHITE * 50.0,
-            emissive_texture: Some( asset_server.load("tx_hextest/Hex Test_Emissive-256x256.PNG") ),
-            perceptual_roughness: 1.0,
-            metallic: 1.0,
-            metallic_roughness_texture: Some( asset_server.load("tx_hextest/Hex Test_MetalRoughness-256x256.PNG") ),
-            occlusion_texture: Some( asset_server.load("tx_hextest/Hex Test_AmbientOcclusion-256x256.PNG") ),
-            ..default()
-        }),
-         transform: Transform::from_scale(Vec3::new(10.0, 10.0, 10.0)),
-        //     Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)).with_scale( Vec3::new(4.0, 4.0, 4.0) ),
-        ..default()
-    }, Ground) );
 
 
     // Stuff for summoning circles
@@ -272,8 +186,6 @@ fn setup(
     stuff.player_stuff[2].color  = Color::rgb_u8(5, 254, 161);
     stuff.player_stuff[2].color2 = Color::rgb_u8(1, 152, 30);
 
-    // stuff.player_stuff[3].color  = Color::rgb_u8(185, 103, 255);
-    // stuff.player_stuff[3].color2 = Color::rgb_u8(52, 37, 174);
     stuff.player_stuff[3].color  = Color::rgb_u8(161, 39, 255);
     stuff.player_stuff[3].color2 = Color::rgb_u8(52, 37, 174);
 
@@ -378,41 +290,7 @@ fn setup(
         ..default()
     } );
 
-    commands.spawn((SpriteBundle {
-        texture: asset_server.load("title.png"),
-        transform: Transform::from_xyz( 0.0, 0.0, 3.0 ).with_scale( Vec3::splat( 0.6)),
-        ..default()
-    }, TitleScreenCrap ));
-
-    // setup player status
-    stuff.player_stuff[0].ptype = PlayerType::Local;
-    stuff.player_stuff[1].ptype = PlayerType::AI;
-    stuff.player_stuff[2].ptype = PlayerType::AI;
-    stuff.player_stuff[3].ptype = PlayerType::NotActive;
-
-    let mut yy = 350.0;
-    for i in 0..4 {
-
-            commands.spawn((
-                TextBundle::from_section("Player # -- ???",
-                    TextStyle {
-                        color: stuff.player_stuff[i].color,
-                        font_size: 30.,
-                        ..default()
-                    },
-                )
-                .with_style(Style {
-                    position_type: PositionType::Absolute,
-                    top: Val::Px(yy),
-                    left: Val::Px( 300.0),
-                    ..default()
-                }),
-                PlayerSetting(i as i32),
-                TitleScreenCrap) );
-            yy += 30.0;
-    }
-
-    ev_settings.send( PlayerSettingsChanged );
+    
 
 }
 
@@ -484,13 +362,50 @@ fn build_hud(
 }
 
 fn setup_gameplay (
-    mut commands: Commands,
+    asset_server: Res<AssetServer>,
     stuff: Res<GoodStuff>,
+    mut commands: Commands,    
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 )
 {
     println!("Hello from setup gameplay");
+        // circular base
+        let mut plane_mesh = Mesh::from( Plane3d { normal: Direction3d::Y } )
+        .with_generated_tangents().unwrap();
+
+    // scale the UVs
+    let uvs = plane_mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0).unwrap();
+    let uvscale = 3.0;
+    match uvs {
+        VertexAttributeValues::Float32x2(values) => {
+        for uv in values.iter_mut() {
+            uv[0] *= uvscale;
+            uv[1] *= uvscale;
+        }
+        },
+        _ => (),
+    };
+
+    commands.spawn((PbrBundle {
+    //mesh: meshes.add(Circle::new(4.0)),
+    mesh: meshes.add( plane_mesh ),
+    material: materials.add( StandardMaterial{
+    base_color_texture: Some( asset_server.load("tx_hextest/Hex Test_BaseColor-256x256.PNG") ),
+    normal_map_texture: Some( asset_server.load("tx_hextest/Hex Test_Normal-256x256.PNG") ),
+    emissive: Color::WHITE * 50.0,
+    emissive_texture: Some( asset_server.load("tx_hextest/Hex Test_Emissive-256x256.PNG") ),
+    perceptual_roughness: 1.0,
+    metallic: 1.0,
+    metallic_roughness_texture: Some( asset_server.load("tx_hextest/Hex Test_MetalRoughness-256x256.PNG") ),
+    occlusion_texture: Some( asset_server.load("tx_hextest/Hex Test_AmbientOcclusion-256x256.PNG") ),
+    ..default()
+    }),
+    transform: Transform::from_scale(Vec3::new(10.0, 10.0, 10.0)),
+    //     Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)).with_scale( Vec3::new(4.0, 4.0, 4.0) ),
+    ..default()
+    }, Ground) );
+
 
     // cursor with no cube
     commands.spawn((GameCursor { ndx : 0,
@@ -820,23 +735,15 @@ fn worldpos_from_mapindex( mapindex : i32 ) -> Vec3
 
 fn build_map (
     asset_server: Res<AssetServer>,
-    mut stuff: ResMut<GoodStuff>,
+    stuff: Res<GoodStuff>,
     mut commands: Commands,
     mut gamestate: ResMut<GameState>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut ev_gamestate: EventWriter<GameStateChanged>,
     mut ev_turn: EventWriter<TurnAdvance>,
-    mut ev_settings: EventWriter<PlayerSettingsChanged>,
-    titlescreen_q : Query<Entity, With<TitleScreenCrap>>,
-    keyboard_input: Res<ButtonInput<KeyCode>>,
 )
 {
-
-    // already built
-    if gamestate.player_count > 0 {
-        return;
-    }
 
     /*
     // wait to start this here because of browser audio stuff... need to find a better way
@@ -848,56 +755,6 @@ fn build_map (
     });
     */
 
-    // this all sucks but the contest is ending
-    if gamestate.player_count == 0 {
-
-        let should_run = keyboard_input.just_pressed( KeyCode::Enter ) || keyboard_input.just_pressed( KeyCode::Space );
-
-
-        let mut z = -1;
-        if keyboard_input.just_pressed( KeyCode::Digit1) {
-            z = 0;
-        }
-
-        if keyboard_input.just_pressed( KeyCode::Digit2) {
-            z = 1;
-        }
-
-        if keyboard_input.just_pressed( KeyCode::Digit3) {
-            z = 2;
-        }
-
-        if keyboard_input.just_pressed( KeyCode::Digit4) {
-            z = 3;
-        }
-
-        if z >= 0 {
-            let z = z as usize;
-            if stuff.player_stuff[z].ptype == PlayerType::Local {
-                stuff.player_stuff[z].ptype = PlayerType::AI;
-            } else if stuff.player_stuff[z].ptype == PlayerType::AI {
-                stuff.player_stuff[z].ptype = PlayerType::NotActive;
-            } else if stuff.player_stuff[z].ptype == PlayerType::NotActive {
-                stuff.player_stuff[z].ptype = PlayerType::Local;
-            }
-
-            ev_settings.send( PlayerSettingsChanged );
-        }
-
-        let mut pcount : i32 = 0;
-        for i in 0..4 {
-            if stuff.player_stuff[i].ptype != PlayerType::NotActive {
-                pcount += 1;
-            }
-        }
-
-        if !should_run || pcount == 0 { return };
-    }
-
-    // Despawn all the title screen stuff
-    for e in &titlescreen_q {
-        commands.entity(e).despawn_recursive();
-    }
 
     // Count number of active players to get target size for map
     let mut player_count = 0;
@@ -1017,28 +874,6 @@ fn build_map (
 
     // Send a turn advance to update the player prompt
     ev_turn.send( TurnAdvance(gamestate.player_turn) );
-
-}
-
-fn player_settings(
-    stuff: Res<GoodStuff>,
-    mut setting_q: Query<(&mut Text, &PlayerSetting)>,
-    mut ev_settings: EventReader<PlayerSettingsChanged>,
-) {
-    for ev in ev_settings.read() {
-
-        for (mut text, plr) in &mut setting_q {
-
-            let plr_type = match stuff.player_stuff[plr.0 as usize].ptype {
-                PlayerType::Local => "Human",
-                PlayerType::AI => "AI",
-                PlayerType::NotActive => "None",
-            };
-
-            text.sections[0].value = format!("Player {} -- {}", plr.0 + 1, plr_type);
-        }
-
-    }
 
 }
 
