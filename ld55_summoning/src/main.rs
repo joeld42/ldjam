@@ -5,7 +5,7 @@ use bevy::{
         //bloom::{BloomCompositeMode, BloomSettings},
         bloom::BloomSettings,
         tonemapping::Tonemapping,
-    }, input::keyboard::Key, pbr::NotShadowCaster,
+    }, pbr::NotShadowCaster,
         prelude::*, render::{mesh::VertexAttributeValues,
              texture::{ImageAddressMode, ImageSamplerDescriptor}}, window::WindowResized
 
@@ -88,8 +88,7 @@ struct GameState {
     map_visuals: Vec<Entity>,
     player_count : i32,
     player_turn : i32,
-    turn_num : i32,
-    round_scoring_finished : bool,
+    turn_num : i32
 }
 
 impl Default for GameState {
@@ -100,7 +99,6 @@ impl Default for GameState {
             player_count: 0,
             player_turn: 0,
             turn_num: 0,
-            round_scoring_finished : true,
         }
     }
 }
@@ -115,16 +113,8 @@ struct GameCamera;
 struct PlayerHelp;
 
 #[derive(Component)]
-struct RoundScoringFrame;
-
-#[derive(Component)]
 struct TitleScreenCrap;
 
-#[derive(Component)]
-struct RoundIcon(i32);
-
-#[derive(Component)]
-struct TurnIcon(i32);
 
 #[derive(Component)]
 struct PlayerScore(i32);
@@ -189,11 +179,10 @@ fn main() {
             TitleScreenPlugin
         )
         .init_state::<GameAppState>()
-        //.insert_resource( CardDeck::default() )
         .insert_resource( GoodStuff::default() )
         .insert_resource( GameState::default() )
         .add_systems(Startup, setup)
-        //.add_systems(Startup, build_map )
+        .add_systems( OnEnter(GameAppState::Gameplay), setup_gameplay )
         .add_systems(Update, build_map )
         .add_systems( Update, handle_input )
         .add_systems( Update, on_gamestate_changed )
@@ -310,17 +299,6 @@ fn setup(
         }
     }
 
-    // cursor cube for easier debugging
-    // commands.spawn((PbrBundle {
-    //     mesh: meshes.add(Cuboid::new(1.0, 1.0, 1.0)),
-    //     material: materials.add(Color::rgb_u8(255, 144, 10)),
-    //     transform: Transform::from_xyz(5.0, 0.5, 5.0),
-    //     ..default()
-    // }, GameCursor { ndx : 0,
-    //     drag_from : None, drag_dest : None, cursor_world : Vec3::ZERO, split_pct : 0.5,
-    //     } ));
-
-
 
     // cursor with no cube
     commands.spawn((GameCursor { ndx : 0,
@@ -370,56 +348,24 @@ fn setup(
             GameCamera
         ));
 
-        commands.spawn((
-            TextBundle::from_section(
-                "Hello CyberSummoner\n\
+    // HUD
+    commands.spawn((
+        TextBundle::from_section(
+            "Hello CyberSummoner\n\
                 Instructions go here",
-                TextStyle {
-                    font_size: 20.,
-                    ..default()
-                },
-            )
-            .with_style(Style {
-                position_type: PositionType::Absolute,
-                top: Val::Px(12.0),
-                left: Val::Px(12.0),
+            TextStyle {
+                font_size: 20.,
                 ..default()
-            }),
-            PlayerHelp,
-        ));
-
-
-        commands.spawn((
-            TextBundle::from_section("00",
-                TextStyle {
-                    font_size: 30.,
-                    ..default()
-                },
-            )
-            .with_style( Style {
-                position_type: PositionType::Absolute,
-                top: Val::Px(12.0),
-                left: Val::Px(12.0),
-                ..default()
-            }),
-            SplitLabel { is_dest : true },
-        ));
-
-        commands.spawn((
-            TextBundle::from_section("00",
-                TextStyle {
-                    font_size: 30.,
-                    ..default()
-                },
-            )
-            .with_style( Style {
-                position_type: PositionType::Absolute,
-                top: Val::Px(12.0),
-                left: Val::Px(12.0),
-                ..default()
-            }),
-            SplitLabel { is_dest : false },
-        ));
+            },
+        )
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            top: Val::Px(12.0),
+            left: Val::Px(12.0),
+            ..default()
+        }),
+        PlayerHelp,
+    ));
 
 
     commands.spawn( AIController {
@@ -498,35 +444,48 @@ fn setup(
 
     ev_settings.send( PlayerSettingsChanged );
 
+}
 
-    commands.spawn((SpriteBundle {
-        texture: asset_server.load("turn_frame.png"),
-        transform: Transform::from_xyz( 500.0, 0.0, 1.0 ),
-        ..default()
-    }, RoundScoringFrame )).with_children(|parent| {
-        for i in 0..4 {
-            let icon_y  = 150.0 - (i as f32) * 100.0;
-            parent.spawn(( SpriteBundle {
-                texture: asset_server.load("icon_rat.png"),
-                transform: Transform::from_xyz( 30.0, icon_y, 2.0 ).with_scale( Vec3::splat( 0.6 )),
+fn build_hud(
+    commands: &mut Commands,
+    stuff: Res<GoodStuff>,
+) {
+
+
+    // Split feedback labels
+    commands.spawn((
+        TextBundle::from_section("00",
+            TextStyle {
+                font_size: 30.,
                 ..default()
-            }, RoundIcon(i)));
+            },
+        )
+        .with_style( Style {
+            position_type: PositionType::Absolute,
+            top: Val::Px(12.0),
+            left: Val::Px(12.0),
+            ..default()
+        }),
+        SplitLabel { is_dest : true },
+    ));
 
-            // Turn indicators
-            for j in 0..4 {
-                parent.spawn( (SpriteBundle {
-                    sprite : Sprite {
-                        color : Color::rgba( 1.0, 1.0, 1.0, 0.02 ),
-                        ..default()
-                    },
-                    texture: asset_server.load("hex.png"),
-                    transform: Transform::from_xyz(  (j as f32) * 25.0, icon_y - 50.0, 2.0 ).with_scale( Vec3::splat( 0.3 )),
-                    ..default()
-                }, TurnIcon(i*4 + j)));
-            }
-        }
-    });
+    commands.spawn((
+        TextBundle::from_section("00",
+            TextStyle {
+                font_size: 30.,
+                ..default()
+            },
+        )
+        .with_style( Style {
+            position_type: PositionType::Absolute,
+            top: Val::Px(12.0),
+            left: Val::Px(12.0),
+            ..default()
+        }),
+        SplitLabel { is_dest : false },
+    ));
 
+    // player score labels
     let mut xx = 12.0;
     for i in 0..4 {
         //if (stuff.player_stuff[i].ptype != PlayerType::NotActive)
@@ -552,47 +511,19 @@ fn setup(
         //}
     }
 
-
 }
 
+fn setup_gameplay (
+    mut commands: Commands,
+    stuff: Res<GoodStuff>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+)
+{
+    println!("Hello from setup gameplay");
 
-// fn test_start_game (
-//     // mut world : &mut World,
-//     mut commands: Commands,
-//     keyboard_input: Res<ButtonInput<KeyCode>>,
-// )
-// {
-//     if keyboard_input.just_pressed( KeyCode::KeyW ) {
-//         println!("W pressed");
-//         //world.run_system_once(build_map);
-//     }
-// }
-
-// world.run_system_once(count_entities);
-// fn spawn_cards (
-//     mut commands: Commands,
-//     cards: Res<CardDeck>,
-//     keyboard_input: Res<ButtonInput<KeyCode>>,
-// )
-// {
-//     if keyboard_input.just_pressed( KeyCode::KeyW ) {
-//         println!("W pressed");
-//         let mut rng = rand::thread_rng();
-//         commands.spawn((
-//             SpriteSheetBundle {
-//                 texture: cards.texture.clone(),
-//                 atlas: TextureAtlas {
-//                     layout: cards.layout.clone(),
-//                     index: rng.gen_range(1..20),
-//                 },
-//                 transform: Transform::from_xyz(rng.gen::<f32>() * 1000.0 - 500.0, rng.gen::<f32>() * 700.0 - 350.0, 0.0),
-//                 ..default()
-//             },
-//         ));
-//     }
-// }
-
-
+    build_hud(&mut commands, stuff);
+}
 
 fn handle_input(
     camera_query: Query<(&Camera, &GlobalTransform), With<GameCamera>>,
@@ -1138,7 +1069,6 @@ fn player_guidance(
     game: Res<GameState>,
     //mut helper_q: Query<(&mut Text, &mut Style), With<PlayerHelp>>,
     mut helper_q: Query<&mut Text, With<PlayerHelp>>,
-    mut turnicon_q: Query<(&mut Sprite, &TurnIcon)>,
     mut score_q: Query<(&mut Text, &PlayerScore), Without<PlayerHelp>>,
     mut ev_turn: EventReader<TurnAdvance>, )
 {
@@ -1168,15 +1098,6 @@ fn player_guidance(
         }
 
         if game.player_count > 0 {
-            let icon_n = game.turn_num / game.player_count;
-            for (mut sprite, turn) in &mut turnicon_q {
-                if turn.0 < icon_n {
-                    sprite.color = Color::rgba( 1.0, 1.0, 1.1, 0.3 );
-                } else if turn.0 == icon_n {
-                    sprite.color = pinfo.color;
-                }
-            }
-
             // Update score displays
             for (mut text, score) in &mut score_q {
                 text.sections[0].value = format!( "{:02}", game.snapshot.score[ score.0 as usize ]);
@@ -1312,7 +1233,7 @@ fn update_ai(
                                 new_str-=plyr_evals[player as usize];
                             }
                         }
-                        if(new_str>curr_strength){
+                        if new_str > curr_strength {
                             curr_strength=new_str;
                             game.snapshot=curr_move;
                         }
@@ -1382,16 +1303,12 @@ fn update_ai(
 
 fn update_ui(
     _time: Res<Time>,
-    mut scoreframe_q : Query<&mut Transform, With<RoundScoringFrame>>,
-    mut helper_q: Query<&mut Style, (With<PlayerHelp>,Without<RoundScoringFrame>)>,
+    mut helper_q: Query<&mut Style, With<PlayerHelp>>,
     mut ev_window: EventReader<WindowResized>,
  )
 {
-    //zzzwindows.single().sc
     for ev in ev_window.read() {
         println!("Window resized {} {}", ev.width, ev.height );
-        let mut xform = scoreframe_q.single_mut();
-        xform.translation = Vec3 { x : (ev.width - 177.0) /2.0, y : 0.0, z : 1.0 };
 
         let mut style = helper_q.single_mut();
         style.top = Val::Px( ev.height - 30.0);

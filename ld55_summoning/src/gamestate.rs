@@ -321,7 +321,6 @@ pub fn evaluate_position(snap:GameSnapshot) -> [i32;4]{
             if hex.power>1{
                 let player=1<<(hex.player-1);
                 let not_player=!player;
-                let index=hex.ndx;
                 let movepower:i32=((hex.power-1) as i32)*10000;
                 let mut opportunity:i32=0;
                 for mapdir in MapDirection::iterator() {
