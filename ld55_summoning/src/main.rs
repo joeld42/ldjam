@@ -13,62 +13,24 @@ use bevy::{
 
 
 pub mod summongame;
+use crate::summongame::*;
+
+pub mod map;
+use crate::map::{ build_map, worldpos_from_mapindex };
+
 pub mod gamestate;
+use gamestate::{ gen_valid_moves, evaluate_position };
+
 pub mod titlescreen;
-
-use crate::summongame::{ GameAppState, PlayerType, GoodStuff };
-
-use gamestate::gen_valid_moves;
-use gamestate::evaluate_position;
-
 use titlescreen::TitleScreenPlugin;
 
 use rand::Rng;
-use rand::seq::SliceRandom;
 
 //use std::collections::HashSet;
 use std::{f32::consts::PI, time::Duration};
 
-use crate::gamestate::{GameSnapshot, MapDirection, INVALID};
-use crate::gamestate::MapSpaceContents;
+use crate::gamestate::{ MapDirection, MapSpaceContents, INVALID};
 
-const HEX_SZ : f32 = 1.0;
-
-#[derive(Event)]
-enum GameStateChanged {
-    CircleAdded(i32),
-    CircleSplit(i32,i32),  // old ndx -> new ndx
-}
-
-#[derive(Event)]
-struct TurnAdvance(i32);
-
-
-// FIXME: this should be a singleton component and not a resource
-#[derive(Resource)]
-struct GameState {
-    //map : GameMap,
-    snapshot : GameSnapshot,
-    map_visuals: Vec<Entity>,
-    player_count : i32,
-    player_turn : i32,
-    turn_num : i32
-}
-
-impl Default for GameState {
-    fn default() -> GameState {
-        GameState {
-            snapshot: GameSnapshot::default(),
-            map_visuals: Vec::new(),
-            player_count: 0,
-            player_turn: 0,
-            turn_num: 0,
-        }
-    }
-}
-
-#[derive(Component)]
-struct Ground;
 
 #[derive(Component)]
 struct GameCamera;
@@ -103,14 +65,6 @@ struct AIController {
     turn_timer: Timer,
 }
 
-
-#[derive(Component)]
-struct MapSpaceVisual
-{
-    ndx : usize,
-    circle : Option<Entity>,
-}
-
 fn main() {
 
     App::new()
@@ -136,25 +90,25 @@ fn main() {
         )
         .init_state::<GameAppState>()
         .insert_resource( GoodStuff::default() )
-        .insert_resource( GameState::default() )
+        .insert_resource( SummonGame::default() )
         .add_systems(Startup, setup)
-        
+
         .add_systems( OnEnter(GameAppState::Gameplay), (
-            setup_gameplay, 
-            build_map) )        
-        
+            setup_gameplay,
+            build_map) )
+
         .add_systems(Update, (
-            handle_input, 
-            draw_split_feedback, 
+            handle_input,
+            draw_split_feedback,
             on_gamestate_changed,
             player_guidance,
             update_circ_anim,
             update_ui,
             update_ai).run_if(in_state(GameAppState::Gameplay)))
-        
+
         .add_event::<GameStateChanged>()
         .add_event::<TurnAdvance>()
-        
+
         .run();
 }
 
@@ -164,7 +118,7 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut stuff: ResMut<GoodStuff>,
-    mut config_store: ResMut<GizmoConfigStore>,        
+    mut config_store: ResMut<GizmoConfigStore>,
     asset_server: Res<AssetServer>
 ) {
 
@@ -214,7 +168,7 @@ fn setup(
             stuff.player_stuff[p].ring_mtl[i - 1] = materials.add(ring_mtl);
         }
     }
-    
+
     // light
     commands.spawn(PointLightBundle {
         point_light: PointLight {
@@ -290,7 +244,7 @@ fn setup(
         ..default()
     } );
 
-    
+
 
 }
 
@@ -364,7 +318,7 @@ fn build_hud(
 fn setup_gameplay (
     asset_server: Res<AssetServer>,
     stuff: Res<GoodStuff>,
-    mut commands: Commands,    
+    mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 )
@@ -415,7 +369,7 @@ fn setup_gameplay (
     commands.spawn( AIController {
         turn_timer : Timer::new(Duration::from_secs_f32( 3.0 ), TimerMode::Once),
     });
-    
+
 
     build_hud(&mut commands, stuff);
 }
@@ -428,7 +382,7 @@ fn handle_input(
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     windows: Query<&Window>,
     stuff: Res<GoodStuff>,
-    mut game: ResMut<GameState>,
+    mut game: ResMut<SummonGame>,
     mut ev_gamestate: EventWriter<GameStateChanged>,
     mut ev_turn: EventWriter<TurnAdvance>,
     mut gizmos: Gizmos,
@@ -575,7 +529,7 @@ fn handle_input(
     }
 }
 
-fn draw_map_dir( gizmos: &mut Gizmos, game : &GameState, ndx : i32, dir : MapDirection, color : Color, verbose : bool ) -> Vec3
+fn draw_map_dir( gizmos: &mut Gizmos, game : &SummonGame, ndx : i32, dir : MapDirection, color : Color, verbose : bool ) -> Vec3
 {
     let found = game.snapshot.map.search_dir( ndx,  dir );
     if verbose {
@@ -627,7 +581,7 @@ fn draw_split_feedback(
     camera_q: Query<(&Camera, &Transform, &GlobalTransform), With<GameCamera>>,
     mut label_q: Query<(&SplitLabel, &mut Style, &mut Text, &mut Visibility)>,
     stuff: Res<GoodStuff>,
-    game: Res<GameState>,
+    game: Res<SummonGame>,
     mut gizmos: Gizmos,
 )
 {
@@ -709,20 +663,6 @@ fn calc_split( split_pct : f32, src_pow: i32) -> i32 {
 }
 
 
-fn worldpos_from_mapindex( mapindex : i32 ) -> Vec3
-{
-    let row : i32 = mapindex / (gamestate::MAP_SZ as i32);
-    let col : i32 = mapindex % (gamestate::MAP_SZ as i32);
-
-    // offset if col is odd
-
-
-    // Make a vec3 from row and col
-    let sqrt3 = 1.7320508075688772;
-    let offset = if col % 2 == 1 { HEX_SZ * sqrt3 / 2.0 } else { 0.0 };
-    Vec3::new((col as f32 - 4.5) * (HEX_SZ * (3.0/2.0) ), 0.0,
-    (-row as f32 + 5.0) * (HEX_SZ * sqrt3) + offset )
-}
 
 // fn spawn_mapspace_empty( mut commands: Commands ) -> Entity {
 //     commands.spawn(PbrBundle {
@@ -733,155 +673,11 @@ fn worldpos_from_mapindex( mapindex : i32 ) -> Vec3
 //     }).id()
 // }
 
-fn build_map (
-    asset_server: Res<AssetServer>,
-    stuff: Res<GoodStuff>,
-    mut commands: Commands,
-    mut gamestate: ResMut<GameState>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    mut ev_gamestate: EventWriter<GameStateChanged>,
-    mut ev_turn: EventWriter<TurnAdvance>,
-)
-{
-
-    /*
-    // wait to start this here because of browser audio stuff... need to find a better way
-    // MUUUUSSSIICC
-    commands.spawn(AudioBundle {
-        source: asset_server.load("SummoningStuff_OGG.ogg"),
-        settings: PlaybackSettings::LOOP,
-        ..default()
-    });
-    */
-
-
-    // Count number of active players to get target size for map
-    let mut player_count = 0;
-    for i in 0..stuff.player_stuff.len() {
-        if stuff.player_stuff[i].ptype != PlayerType::NotActive {
-            player_count += 1;
-        }
-    }
-
-    // Remember this
-    gamestate.player_count = player_count;
-
-
-    // First, set up the map indices and build the map
-    let mut rng = rand::thread_rng();
-    let mut index = 0;
-    let mut space_count = 0;
-    for map_space in &mut gamestate.snapshot.map {
-        map_space.ndx = index;
-        index = index + 1;
-
-        let hex_pos = worldpos_from_mapindex( map_space.ndx );
-
-        // this trims the board and makes it more rounder
-        if hex_pos.length() < 8.0 {
-
-            // todo: replace this with adding some obstacles with preset shapes
-            if rng.gen_ratio(1, 8) {
-                map_space.contents = MapSpaceContents::Blocked;
-            } else {
-                map_space.contents = MapSpaceContents::Playable;
-                space_count += 1;
-            }
-        }
-    }
-
-
-    println!("Hello from build_map, Players {} target spaces {} have {}.",
-            player_count, player_count * 16, space_count );
-
-    let target_spaces = player_count * 16;
-    let mut attempts = 1000;
-    while space_count > target_spaces && attempts > 0{
-        // erode away the board edges
-        let edge_spaces = gamestate.snapshot.map.edge_spaces_corners();
-
-        let random_index = rng.gen_range(0..edge_spaces.len());
-        let selected_index = edge_spaces[random_index];
-
-        // Try removing this space
-        let mut map_copy = gamestate.snapshot.map;
-        map_copy.spaces[selected_index as usize].contents = MapSpaceContents::NotInMap;
-
-        if map_copy.check_reachability() {
-            //gamestate.snapshot.map.spaces[selected_index].contents = MapSpaceContents::NotInMap;
-            gamestate.snapshot.map = map_copy;
-            space_count -= 1;
-        }
-
-        attempts -= 1;
-        println!("iter {} edge spaces now has {} entries space_count {}", attempts, edge_spaces.len(), space_count );
-    }
-
-    if attempts == 0 {
-        println!("Warning! Failed to erode map.");
-    }
-
-    // Find starting spaces
-    let mut edge_spaces = gamestate.snapshot.map.edge_spaces();
-    edge_spaces.shuffle( &mut rng );
-
-    for i in 0..stuff.player_stuff.len() {
-        if stuff.player_stuff[i].ptype != PlayerType::NotActive {
-            let selected_index = edge_spaces[i] as usize;
-
-            gamestate.snapshot.map.spaces[ selected_index ].player = (i+1) as u8;
-            gamestate.snapshot.map.spaces[ selected_index ].power = 16;
-
-            ev_gamestate.send( GameStateChanged::CircleAdded( selected_index as i32 ) );
-        }
-    }
-
-
-    // Now build the map visuals based on the map data
-    let hex_scene = asset_server.load("hexagon.glb#Scene0");
-
-    let mut map_visuals = Vec::new();
-    for map_space in &gamestate.snapshot.map {
-        let hex_pos = worldpos_from_mapindex( map_space.ndx );
-        let ent = match map_space.contents {
-            MapSpaceContents::NotInMap => Entity::PLACEHOLDER,
-            MapSpaceContents::Blocked => {
-                commands.spawn((PbrBundle {
-                    mesh: meshes.add(Cuboid::new(1.0, 3.0, 1.0)),
-                    material: materials.add(Color::rgb_u8(96, 60, 100)),
-                    transform: Transform::from_translation( hex_pos ),
-                    ..default()
-                }, MapSpaceVisual { ndx : map_space.ndx as usize, circle: None } )).id()
-            },
-            MapSpaceContents::Playable => {
-                commands.spawn( ( SceneBundle {
-                    scene: hex_scene.clone(),
-                    transform: Transform::from_translation( hex_pos ),
-                    ..default()
-                }, MapSpaceVisual { ndx : map_space.ndx as usize, circle: None } )).id()
-            },
-        };
-
-        map_visuals.push( ent )
-    }
-
-    // Add give the new visuals to map
-    gamestate.map_visuals = map_visuals;
-
-
-    println!("Map size {}", gamestate.map_visuals.len());
-
-    // Send a turn advance to update the player prompt
-    ev_turn.send( TurnAdvance(gamestate.player_turn) );
-
-}
-
 
 fn player_guidance(
     //mut commands: Commands,
     mut stuff: ResMut<GoodStuff>,
-    game: Res<GameState>,
+    game: Res<SummonGame>,
     //mut helper_q: Query<(&mut Text, &mut Style), With<PlayerHelp>>,
     mut helper_q: Query<&mut Text, With<PlayerHelp>>,
     mut score_q: Query<(&mut Text, &PlayerScore), Without<PlayerHelp>>,
@@ -927,7 +723,7 @@ fn player_guidance(
 fn on_gamestate_changed(
     mut commands: Commands,
     stuff: Res<GoodStuff>,
-    gamestate: Res<GameState>,
+    gamestate: Res<SummonGame>,
     mut q_mapvis : Query<&mut MapSpaceVisual>,
     mut ev_gamestate: EventReader<GameStateChanged>, )
 {
@@ -1011,7 +807,7 @@ fn update_ai(
     mut q_ai : Query<&mut AIController>,
     mut ev_turn: EventWriter<TurnAdvance>,
     mut ev_gamestate: EventWriter<GameStateChanged>,
-    mut game: ResMut<GameState>,
+    mut game: ResMut<SummonGame>,
 ) {
     let pinfo = &stuff.player_stuff[game.player_turn as usize];
     let mut should_advance_turn = false;

@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use crate::summongame::{ GameAppState, PlayerType, GoodStuff };
 
-
 #[derive(Component)]
 pub struct TitleScreenCleanup;
 
@@ -22,7 +21,7 @@ impl Plugin for TitleScreenPlugin {
         app
             .add_systems( OnEnter(GameAppState::TitleScreen), title_setup )
             .add_systems(Update, (
-                title_update, 
+                title_update,
                 player_settings)
                 .run_if(in_state(GameAppState::TitleScreen)))
             .add_systems( OnExit(GameAppState::TitleScreen), title_teardown )
@@ -30,11 +29,11 @@ impl Plugin for TitleScreenPlugin {
     }
 }
 
-fn title_setup( 
+fn title_setup(
     asset_server: Res<AssetServer>,
-    mut commands: Commands,    
+    mut commands: Commands,
     mut stuff: ResMut<GoodStuff>,
-    mut ev_settings: EventWriter<PlayerSettingsChanged>,    
+    mut ev_settings: EventWriter<PlayerSettingsChanged>,
 ) {
     println!("Title screen setup!");
 
@@ -129,13 +128,13 @@ fn title_update (
             1 => KeyCode::Digit2,
             2 => KeyCode::Digit3,
             3 => KeyCode::Digit4,
-            _ => KeyCode::KeyQ,            
+            _ => KeyCode::KeyQ,
         };
         if keyboard_input.just_pressed(  keycode ) {
             z = i;
             break;
         }
-    }    
+    }
 
     if z >= 0 {
         let z = z as usize;
@@ -158,10 +157,10 @@ fn title_update (
     }
 
     // Start game?
-    if pcount > 0 {            
+    if pcount > 0 {
         if keyboard_input.just_pressed( KeyCode::Enter ) ||
             keyboard_input.just_pressed( KeyCode::Space )
-        {            
+        {
             game_state.set(GameAppState::Gameplay);
         }
     }
