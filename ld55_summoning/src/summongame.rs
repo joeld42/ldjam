@@ -11,7 +11,7 @@ pub enum GameAppState {
     Gameplay,
 }
 
-#[derive(Default, PartialEq)]
+#[derive(Default, PartialEq, Debug)]
 pub enum PlayerType {
     Local,
     AI, // AI(AIPolicy)

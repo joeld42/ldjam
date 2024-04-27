@@ -11,6 +11,22 @@ struct PlayerSetting(i32);
 #[derive(Event)]
 struct PlayerSettingsChanged;
 
+// Actions from the Player Settings buttons
+#[derive(Component)]
+enum PlayerSettingsButtonAction {
+    ChangeProfile(i32),    
+    ChangeMode(i32),
+}
+
+
+// Resource  stuff
+#[derive(Resource,Default)]
+pub struct TitleScreenStuff {
+    pub pics_human: Vec<Handle<Image>>,
+    pub pics_bot: Vec<Handle<Image>>,
+}
+
+use rand::Rng;
 
 pub struct TitleScreenPlugin;
 
@@ -19,10 +35,14 @@ impl Plugin for TitleScreenPlugin {
         println!("In TitleScreenPlugin build...");
         //app.add_state(GameAppState::TitleScreen);
         app
+            .insert_resource( TitleScreenStuff::default() )
             .add_systems( OnEnter(GameAppState::TitleScreen), title_setup )
             .add_systems(Update, (
                 title_update,
-                //player_settings
+                
+                player_settings,
+                player_settings_action
+
                 )
                 .run_if(in_state(GameAppState::TitleScreen)))
             .add_systems( OnExit(GameAppState::TitleScreen), title_teardown )
@@ -34,41 +54,26 @@ fn title_setup(
     asset_server: Res<AssetServer>,
     mut commands: Commands,
     mut stuff: ResMut<GoodStuff>,
+    mut title_stuff: ResMut<TitleScreenStuff>,
     mut ev_settings: EventWriter<PlayerSettingsChanged>,
 ) {
     println!("Title screen setup!");
 
 
-    // commands.spawn((SpriteBundle {
-    //     texture: asset_server.load("title.png"),
-    //     transform: Transform::from_xyz( 0.0, 0.0, 3.0 ).with_scale( Vec3::splat( 0.6)),
-    //     ..default()
-    // }, TitleScreenCleanup ));
-
-
-    // commands.spawn((
-    //     TextBundle::from_section(
-    //         "Title Screen Goes Here",
-    //         TextStyle {
-    //             font_size: 20.,
-    //             ..default()
-    //         },
-    //     )
-    //     .with_style(Style {
-    //         position_type: PositionType::Absolute,
-    //         top: Val::Px(12.0),
-    //         left: Val::Px(12.0),
-    //         ..default()
-    //     }),
-    //     TitleScreenCleanup,
-    // ));
-
     let title_img = asset_server.load("summoner_title.png");
     let playerframe_img = asset_server.load("ui_playerframe.png");
     let border_img = asset_server.load("panel-transparent-border-027.png");
 
-    let portrait_imgs = asset_server.load("portrait1.png");
 
+    for i in 1..=5 
+    {
+        title_stuff.pics_human.push( asset_server.load(format!("portrait{}.png", i)));
+    }
+
+    for i in 1..=3 
+    {
+        title_stuff.pics_bot.push( asset_server.load(format!("portrait_bot{}.png", i)));
+    }
 
     let slicer = TextureSlicer {
         border: BorderRect::square(22.0),
@@ -99,7 +104,7 @@ fn title_setup(
             parent.spawn(ImageBundle {
                 style: Style {
                     width: Val::Percent(100.0),
-                    margin: UiRect::top( Val::Percent( 5.0 )),
+                    margin: UiRect::top( Val::Percent( 2.0 )),
                     ..default()
                 },
                 image: UiImage::new(title_img),
@@ -108,7 +113,8 @@ fn title_setup(
             });
 
             // ---- Player Select Tiles -----------------------
-            let tile_scale = 0.6;
+            let mut rng = rand::thread_rng();
+            let tile_scale = 0.9;
             parent.spawn( NodeBundle {
                 style: Style {
                     flex_wrap: FlexWrap::Wrap,
@@ -141,33 +147,34 @@ fn title_setup(
 
                             //==== Player#1 header
                             parent.spawn(TextBundle::from_section(
-                                format!("PLR0{}", (i+1) ).clone(),
+                                format!("Player {}", (i+1) ).clone(),
                                 TextStyle {
                                     //font: asset_server.load("Cyberthrone.ttf"),
-                                    font_size: 12.0,
+                                    font_size: 14.0,
                                     color: Color::rgb(1.0, 1.0, 1.0),
                                     ..default()
                                 },
                             ).with_style( Style {
                                 width: Val::Px(130.0 * tile_scale),
-                                margin: UiRect::new( Val::Px( 12.0 ), Val::Px( 8.0 ), Val::Px( 4.0 ), Val::Px( 6.0 )),
+                                margin: UiRect::new( Val::Px( 12.0 ), Val::Px( 8.0 ), Val::Px( 15.0 ), Val::Px( 6.0 )),
                                 ..default()
                             }));
 
                             // Portrait
+                            let pic = title_stuff.pics_human[ rng.gen_range( 0..title_stuff.pics_human.len() ) ].clone();
                             parent.spawn( ImageBundle {
                                 style: Style {
                                     width: Val::Px( 100.0 * tile_scale ),
                                     height: Val::Px( 100.0 * tile_scale  ),
                                     ..default()
                                 },
-                                image: UiImage::new( portrait_imgs.clone() ),
+                                image: UiImage::new( pic ),
                                 ..default()
                             });
 
                             //==== PlayerName
                             parent.spawn(TextBundle::from_section(
-                                "Human",
+                                "Name",
                                 TextStyle {
                                     //font: asset_server.load("Cyberthrone.ttf"),
                                     font_size: 20.0,
@@ -177,17 +184,14 @@ fn title_setup(
                             ).with_style( Style {
                                 width: Val::Px(130.0 * tile_scale),
                                 margin: UiRect::new( Val::Px( 40.0 ), Val::Px( 20.0 ),
-                                                        Val::Px( 6.0 ), Val::Px( 4.0 )),
+                                                        Val::Px( 6.0 ), Val::Px( 15.0 )),
                                 ..default()
                             }));
-
-
-
 
                             // Human/AI/None Selection Bar
                             parent.spawn( NodeBundle {
                                 style: Style {
-                                    width: Val::Percent(100.0),
+                                    width: Val::Percent(95.0),
                                     //flex_wrap: FlexWrap::Wrap,
                                     //align_items: AlignItems::SpaceEvenly,
                                     justify_content: JustifyContent::SpaceEvenly,
@@ -203,33 +207,28 @@ fn title_setup(
                                 for btn_ndx in 0..btn_names.len() {
                                     let btn_name = btn_names[ btn_ndx];
 
-                                    let (btncolor, txtcolor) = if btn_name == "Human" {
-                                        (Color::rgba(0.0, 0.0, 0.0, 0.5),
-                                        Color::WHITE )
-                                    } else {
-                                        (Color::rgba(0.0, 0.0, 0.0, 0.0),
-                                            stuff.player_stuff[i].color2
-                                        )
-                                    };
-
+                                    
                                     btnparent.spawn(
-                                        ButtonBundle {
+                                        (ButtonBundle {
                                             style: Style {
                                                 justify_content: JustifyContent::Center,
                                                 align_items: AlignItems::Center,
+                                                height: Val::Px(20.0),
                                                 ..default()
                                             },
-                                            background_color: BackgroundColor( btncolor  ),
+                                            //background_color: BackgroundColor( btncolor  ),
                                             ..default()
-                                        }
-                                    )
+                                        },
+                                        PlayerSetting(i as i32),
+                                        PlayerSettingsButtonAction::ChangeMode( btn_ndx as i32),
+                                     ))
                                     .with_children(|parent| {
                                         parent.spawn(TextBundle::from_section(
                                             btn_name,
                                             TextStyle {
                                                 //font: asset_server.load("Cyberthrone.ttf"),
-                                                font_size: 12.0,
-                                                color: txtcolor,
+                                                font_size: 20.0,
+                                                //color: txtcolor,
                                                 ..default()
                                             },
                                         ));
@@ -255,7 +254,7 @@ fn title_setup(
                             // vertically center child text
                             align_items: AlignItems::Center,
                             //margin: UiRect::all(Val::Px(20.0)),
-                            margin: UiRect::new( Val::Px(20.0), Val::Px(20.0),Val::Px(20.0),Val::Px(50.0) ),
+                            margin: UiRect::new( Val::Px(20.0), Val::Px(20.0),Val::Px(8.0),Val::Px(50.0) ),
                             ..default()
                         },
                         image: border_img.clone().into(),
@@ -372,26 +371,71 @@ fn title_update (
 
 fn player_settings(
     stuff: Res<GoodStuff>,
-    mut setting_q: Query<(&mut Text, &PlayerSetting)>,
+    mut setting_q: Query<(&Children, &mut BackgroundColor, &PlayerSetting, &PlayerSettingsButtonAction)>,
+    mut text_query: Query<&mut Text>,
     mut ev_settings: EventReader<PlayerSettingsChanged>,
 ) {
+    
     for _ev in ev_settings.read() {
 
-        for (mut text, plr) in &mut setting_q {
+        println!("Got player settings event ev" );
 
-            let plr_type = match stuff.player_stuff[plr.0 as usize].ptype {
-                PlayerType::Local => "Human",
-                PlayerType::AI => "AI",
-                PlayerType::NotActive => "None",
-            };
+        for (children, mut bg, plr, plr_action) in &mut setting_q {
+            let pndx = plr.0 as usize;
 
-            text.sections[0].value = format!("Player {} -- {}", plr.0 + 1, plr_type);
+            if let PlayerSettingsButtonAction::ChangeMode(mode) = plr_action {
+                
+                let mtype = match mode {
+                    0 => PlayerType::Local,
+                    1 => PlayerType::AI,
+                    _ => PlayerType::NotActive,
+                };
+
+                let (btncolor, txtcolor) = if stuff.player_stuff[pndx].ptype == mtype {
+                    (Color::rgba(0.0, 0.0, 0.0, 0.5), Color::WHITE)
+                } else {
+                    (Color::rgba(0.0, 0.0, 0.0, 0.0), stuff.player_stuff[pndx].color2)
+                };
+
+                let mut text = text_query.get_mut(children[0]).unwrap();
+
+                println!("Setting PLR {} to {:?}", pndx, mtype );
+                bg.0 = btncolor;
+                text.sections[0].style.color = txtcolor;
+            }            
         }
-
     }
 
 }
 
+fn player_settings_action(
+    interaction_query: Query<
+        (&Interaction, &PlayerSettingsButtonAction, &PlayerSetting),
+        (Changed<Interaction>, With<Button>),
+    >,
+    mut ev_settings: EventWriter<PlayerSettingsChanged>,
+    mut stuff: ResMut<GoodStuff>,
+) {
+    for (interaction, menu_button_action, player) in &interaction_query {
+        if *interaction == Interaction::Pressed {
+            match menu_button_action {
+                PlayerSettingsButtonAction::ChangeProfile(inc) => {
+                    println!("Change Profile PLR {} inc {}", player.0, *inc );
+                }
+                
+                PlayerSettingsButtonAction::ChangeMode(mode) => {
+                    println!("Change mode PLR {} mode {}", player.0, mode );
+                    stuff.player_stuff[player.0 as usize].ptype = match mode {
+                        0 => PlayerType::Local,
+                        1 => PlayerType::AI,
+                        _ => PlayerType::NotActive,
+                    };
+                    ev_settings.send( PlayerSettingsChanged );
+                }                
+            }
+        }
+    }
+}
 
 
 fn title_teardown(
