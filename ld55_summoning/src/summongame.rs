@@ -26,6 +26,7 @@ pub struct PlayerStuff
     pub color2 : Color,
     pub ring_mtl: [ Handle<StandardMaterial>; 21 ],
     pub ptype : PlayerType,
+    pub profile : i32,
     pub out_of_moves : bool,
 }
 

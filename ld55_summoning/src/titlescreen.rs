@@ -1,11 +1,14 @@
-use bevy::{prelude::*, scene::ron::de};
+use bevy::prelude::* ;
 use crate::summongame::{ GameAppState, PlayerType, GoodStuff };
 
 #[derive(Component)]
 pub struct TitleScreenCleanup;
 
 #[derive(Component)]
-struct PlayerSetting(i32);
+struct PlayerSetting 
+{
+    pnum : i32,
+}
 
 
 #[derive(Event)]
@@ -160,18 +163,65 @@ fn title_setup(
                                 ..default()
                             }));
 
-                            // Portrait
-                            let pic = title_stuff.pics_human[ rng.gen_range( 0..title_stuff.pics_human.len() ) ].clone();
-                            parent.spawn( ImageBundle {
+                            // Profile Frame
+                            parent.spawn( NodeBundle {
                                 style: Style {
-                                    width: Val::Px( 100.0 * tile_scale ),
-                                    height: Val::Px( 100.0 * tile_scale  ),
+                                    width: Val::Percent(95.0),
+                                    flex_direction: FlexDirection::Row,
+                                    align_items: AlignItems::Center,
+                                    justify_content: JustifyContent::SpaceEvenly,
                                     ..default()
                                 },
-                                image: UiImage::new( pic ),
+                                //background_color: BackgroundColor( Color::rgba( 1.0, 1.0, 1.0, 0.3 ) ),
                                 ..default()
+                            }).with_children( |pf_parent| {
+
+
+                                // Left arrow
+                                pf_parent.spawn((
+                                    ButtonBundle {
+                                        style: Style {
+                                            width: Val::Px(16.0),
+                                            height: Val::Px(16.0),                                            
+                                            ..default()
+                                        },
+                                        image: asset_server.load("btn-arrow-left.png" ).into(),
+                                        ..default()
+                                    },
+                                    PlayerSetting { pnum: i as i32 },  
+                                    PlayerSettingsButtonAction::ChangeProfile( -1 ),
+                                ));
+
+                                // Portrait
+                                let pic = title_stuff.pics_human[ rng.gen_range( 0..title_stuff.pics_human.len() ) ].clone();                        
+                                pf_parent.spawn( ImageBundle {
+                                    style: Style {
+                                        width: Val::Px( 100.0 * tile_scale ),
+                                        height: Val::Px( 100.0 * tile_scale  ),
+                                        ..default()
+                                    },
+                                    image: UiImage::new( pic ),
+                                    ..default()
+                                });
+
+                                // Right arrow
+                                pf_parent.spawn((
+                                    ButtonBundle {
+                                        style: Style {
+                                            width: Val::Px(16.0),
+                                            height: Val::Px(16.0),                                            
+                                            ..default()
+                                        },
+                                        image: asset_server.load("btn-arrow-right.png" ).into(),
+                                        ..default()
+                                    },
+                                    PlayerSetting { pnum: i as i32 },   
+                                    PlayerSettingsButtonAction::ChangeProfile( 1 ),                                 
+                                ));
+
                             });
 
+                            
                             //==== PlayerName
                             parent.spawn(TextBundle::from_section(
                                 "Name",
@@ -219,7 +269,7 @@ fn title_setup(
                                             //background_color: BackgroundColor( btncolor  ),
                                             ..default()
                                         },
-                                        PlayerSetting(i as i32),
+                                        PlayerSetting{ pnum: i as i32},
                                         PlayerSettingsButtonAction::ChangeMode( btn_ndx as i32),
                                      ))
                                     .with_children(|parent| {
@@ -272,12 +322,7 @@ fn title_setup(
                         },
                     ));
                 });
-
         });
-
-
-
-
 
     // setup player status
     stuff.player_stuff[0].ptype = PlayerType::Local;
@@ -381,7 +426,7 @@ fn player_settings(
         println!("Got player settings event ev" );
 
         for (children, mut bg, plr, plr_action) in &mut setting_q {
-            let pndx = plr.0 as usize;
+            let pndx = plr.pnum as usize;
 
             if let PlayerSettingsButtonAction::ChangeMode(mode) = plr_action {
                 
@@ -420,12 +465,12 @@ fn player_settings_action(
         if *interaction == Interaction::Pressed {
             match menu_button_action {
                 PlayerSettingsButtonAction::ChangeProfile(inc) => {
-                    println!("Change Profile PLR {} inc {}", player.0, *inc );
+                    println!("Change Profile PLR {} inc {}", player.pnum, *inc );
                 }
                 
                 PlayerSettingsButtonAction::ChangeMode(mode) => {
-                    println!("Change mode PLR {} mode {}", player.0, mode );
-                    stuff.player_stuff[player.0 as usize].ptype = match mode {
+                    println!("Change mode PLR {} mode {}", player.pnum, mode );
+                    stuff.player_stuff[player.pnum as usize].ptype = match mode {
                         0 => PlayerType::Local,
                         1 => PlayerType::AI,
                         _ => PlayerType::NotActive,
