@@ -5,7 +5,7 @@ use crate::summongame::{ GameAppState, PlayerType, GoodStuff };
 pub struct TitleScreenCleanup;
 
 #[derive(Component)]
-struct PlayerSetting 
+struct PlayerSetting
 {
     pnum : i32,
 }
@@ -19,16 +19,23 @@ struct PlayerSettingsChanged;
 // Actions from the Player Settings buttons
 #[derive(Component)]
 enum PlayerSettingsButtonAction {
-    ChangeProfile(i32),    
+    ChangeProfile(i32),
     ChangeMode(i32),
 }
 
+
+// Menu Action
+#[derive(Component)]
+enum MainMenuAction {
+    StartGame,
+}
 
 // Resource  stuff
 #[derive(Resource,Default)]
 pub struct TitleScreenStuff {
     pub pics_human: Vec<Handle<Image>>,
     pub pics_bot: Vec<Handle<Image>>,
+    pub pic_none: Handle<Image>,
 }
 
 use rand::Rng;
@@ -44,9 +51,10 @@ impl Plugin for TitleScreenPlugin {
             .add_systems( OnEnter(GameAppState::TitleScreen), title_setup )
             .add_systems(Update, (
                 title_update,
-                
+
                 player_settings,
-                player_settings_action
+                player_settings_action,
+                main_menu_action,
 
                 )
                 .run_if(in_state(GameAppState::TitleScreen)))
@@ -70,15 +78,17 @@ fn title_setup(
     let border_img = asset_server.load("panel-transparent-border-027.png");
 
 
-    for i in 1..=5 
+    for i in 1..=5
     {
         title_stuff.pics_human.push( asset_server.load(format!("portrait{}.png", i)));
     }
 
-    for i in 1..=3 
+    for i in 1..=3
     {
         title_stuff.pics_bot.push( asset_server.load(format!("portrait_bot{}.png", i)));
     }
+
+    title_stuff.pic_none = asset_server.load( "portrait_none.png");
 
     let slicer = TextureSlicer {
         border: BorderRect::square(22.0),
@@ -89,7 +99,7 @@ fn title_setup(
 
     let title_sz = 80.0;
     commands
-        .spawn(NodeBundle {
+        .spawn((NodeBundle {
             style: Style {
                 left: Val::Percent((100.0 - title_sz) / 2.0),
                 width: Val::Percent(title_sz),
@@ -101,7 +111,7 @@ fn title_setup(
             },
             //background_color: BackgroundColor( Color::Rgba { red: 1.0, green: 0.0, blue: 0.0, alpha: 0.2 } ),
             ..default()
-        })
+        }, TitleScreenCleanup ))
         .with_children(|parent| {
 
 
@@ -184,18 +194,18 @@ fn title_setup(
                                     ButtonBundle {
                                         style: Style {
                                             width: Val::Px(16.0),
-                                            height: Val::Px(16.0),                                            
+                                            height: Val::Px(16.0),
                                             ..default()
                                         },
                                         image: asset_server.load("btn-arrow-left.png" ).into(),
                                         ..default()
                                     },
-                                    PlayerSetting { pnum: i as i32 },  
+                                    PlayerSetting { pnum: i as i32 },
                                     PlayerSettingsButtonAction::ChangeProfile( -1 ),
                                 ));
 
                                 // Portrait
-                                let pic = title_stuff.pics_human[ rng.gen_range( 0..title_stuff.pics_human.len() ) ].clone();                        
+                                let pic = title_stuff.pics_human[ rng.gen_range( 0..title_stuff.pics_human.len() ) ].clone();
                                 pf_parent.spawn( (ImageBundle {
                                     style: Style {
                                         width: Val::Px( 100.0 * tile_scale ),
@@ -211,19 +221,19 @@ fn title_setup(
                                     ButtonBundle {
                                         style: Style {
                                             width: Val::Px(16.0),
-                                            height: Val::Px(16.0),                                            
+                                            height: Val::Px(16.0),
                                             ..default()
                                         },
                                         image: asset_server.load("btn-arrow-right.png" ).into(),
                                         ..default()
                                     },
-                                    PlayerSetting { pnum: i as i32  },   
-                                    PlayerSettingsButtonAction::ChangeProfile( 1 ),                                 
+                                    PlayerSetting { pnum: i as i32  },
+                                    PlayerSettingsButtonAction::ChangeProfile( 1 ),
                                 ));
 
                             });
 
-                            
+
                             //==== PlayerName
                             parent.spawn(TextBundle::from_section(
                                 "Name",
@@ -259,7 +269,7 @@ fn title_setup(
                                 for btn_ndx in 0..btn_names.len() {
                                     let btn_name = btn_names[ btn_ndx];
 
-                                    
+
                                     btnparent.spawn(
                                         (ButtonBundle {
                                             style: Style {
@@ -313,6 +323,7 @@ fn title_setup(
                         ..default()
                     },
                     ImageScaleMode::Sliced(slicer.clone()),
+                    MainMenuAction::StartGame,
                 ))
                 .with_children(|parent| {
                     parent.spawn(TextBundle::from_section(
@@ -418,13 +429,13 @@ fn title_update (
 
 fn player_settings(
     stuff: Res<GoodStuff>,
-    title_stuff: Res<TitleScreenStuff>, 
+    title_stuff: Res<TitleScreenStuff>,
     mut setting_q: Query<(&Children, &mut BackgroundColor, &PlayerSetting, &PlayerSettingsButtonAction)>,
     mut profile_pic_q : Query<(&PlayerSetting, &mut UiImage), With<ProfilePic>>,
     mut text_query: Query<&mut Text>,
     mut ev_settings: EventReader<PlayerSettingsChanged>,
 ) {
-    
+
     for _ev in ev_settings.read() {
 
         println!("Got player settings event ev" );
@@ -433,7 +444,7 @@ fn player_settings(
             let pndx = plr.pnum as usize;
 
             if let PlayerSettingsButtonAction::ChangeMode(mode) = plr_action {
-                
+
                 let mtype = match mode {
                     0 => PlayerType::Local,
                     1 => PlayerType::AI,
@@ -451,21 +462,23 @@ fn player_settings(
                 println!("Setting PLR {} to {:?}", pndx, mtype );
                 bg.0 = btncolor;
                 text.sections[0].style.color = txtcolor;
-            }            
+            }
         }
+
+        // TODO: Disable the "Start Game" button here if no players are active
 
         // Check that all settings have the right profile pic
         for (pic_plr, mut pic_img) in &mut profile_pic_q {
             let pic = match (stuff.player_stuff[ pic_plr.pnum as usize ].ptype) {
                 PlayerType::Local => &title_stuff.pics_human[ stuff.player_stuff[ pic_plr.pnum as usize ].human_profile as usize ],
                 PlayerType::AI => &title_stuff.pics_bot[ stuff.player_stuff[ pic_plr.pnum as usize ].bot_profile as usize ],
-                _ => &title_stuff.pics_human[0], // todo: X pic
+                _ => &title_stuff.pic_none,
             };
 
             if (*pic != pic_img.texture) {
                 pic_img.texture = pic.clone();
-            }            
-        }        
+            }
+        }
     }
 
 }
@@ -473,7 +486,7 @@ fn player_settings(
 fn player_settings_action(
     mut profile_pic_q : Query<(&PlayerSetting, &mut UiImage), With<ProfilePic>>,
     mut stuff: ResMut<GoodStuff>,
-    title_stuff: Res<TitleScreenStuff>, 
+    title_stuff: Res<TitleScreenStuff>,
     interaction_query: Query<
         (&Interaction, &PlayerSettingsButtonAction, &PlayerSetting),
         (Changed<Interaction>, With<Button>),
@@ -491,7 +504,7 @@ fn player_settings_action(
                             if (pic_plr.pnum == player.pnum ) {
 
                                 if stuff.player_stuff[player.pnum as usize].ptype == PlayerType::Local {
-                                    
+
                                     let mut v = stuff.player_stuff[player.pnum as usize].human_profile as i32;
                                     v += inc;
                                     if (v < 0) {
@@ -502,25 +515,23 @@ fn player_settings_action(
 
                                     stuff.player_stuff[player.pnum as usize].human_profile = v;
                                     pic_img.texture = title_stuff.pics_human[v as usize].clone();
-                                    
+
                                 } else if stuff.player_stuff[player.pnum as usize].ptype == PlayerType::AI {
 
                                     let mut v = stuff.player_stuff[player.pnum as usize].bot_profile as i32;
                                     v += inc;
                                     if (v < 0) {
                                         v = title_stuff.pics_bot.len() as i32 - 1;
-                                    } else if (v >= title_stuff.pics_bot.len() as i32) {
+                                    } else if v >= title_stuff.pics_bot.len() as i32 {
                                         v = 0;
                                     }
 
                                     stuff.player_stuff[player.pnum as usize].bot_profile = v;
-                                    //pic_img.texture = title_stuff.pics_bot[v as usize].clone();
-                                
                             }  // Else NotActive
                         }
                     }
                 }
-                
+
                 PlayerSettingsButtonAction::ChangeMode(mode) => {
                     println!("Change mode PLR {} mode {}", player.pnum, mode );
                     stuff.player_stuff[player.pnum as usize].ptype = match mode {
@@ -528,7 +539,8 @@ fn player_settings_action(
                         1 => PlayerType::AI,
                         _ => PlayerType::NotActive,
                     };
-                }                
+                }
+
             }
 
             ev_settings.send( PlayerSettingsChanged );
@@ -536,6 +548,37 @@ fn player_settings_action(
     }
 }
 
+fn main_menu_action (
+    stuff: Res<GoodStuff>,
+    mut game_state: ResMut<NextState<GameAppState>>,
+    interaction_query: Query<
+        (&Interaction, &MainMenuAction),
+        (Changed<Interaction>, With<Button>),
+    >,
+    mut ev_settings: EventWriter<PlayerSettingsChanged>,
+) {
+
+    let mut pcount : i32 = 0;
+    for i in 0..4 {
+        if stuff.player_stuff[i].ptype != PlayerType::NotActive {
+            pcount += 1;
+        }
+    }
+
+
+    for (interaction, menu_button_action) in &interaction_query {
+        if *interaction == Interaction::Pressed {
+            match menu_button_action {
+                MainMenuAction::StartGame => {
+                    if (pcount > 0) {
+                        println!("Start Game");
+                        game_state.set(GameAppState::Gameplay);
+                    } // else feedback
+                }
+            }
+        }
+    }
+}
 
 fn title_teardown(
     mut commands: Commands,
