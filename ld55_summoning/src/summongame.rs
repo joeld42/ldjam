@@ -14,7 +14,7 @@ pub enum GameAppState {
 #[derive(Default, PartialEq, Debug)]
 pub enum PlayerType {
     Local,
-    AI, // AI(AIPolicy)
+    AI,
     #[default]
     NotActive
 }
@@ -26,7 +26,8 @@ pub struct PlayerStuff
     pub color2 : Color,
     pub ring_mtl: [ Handle<StandardMaterial>; 21 ],
     pub ptype : PlayerType,
-    pub profile : i32,
+    pub bot_profile : i32,
+    pub human_profile : i32,
     pub out_of_moves : bool,
 }
 

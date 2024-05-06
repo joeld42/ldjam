@@ -10,6 +10,8 @@ struct PlayerSetting
     pnum : i32,
 }
 
+#[derive(Component)]
+struct ProfilePic;
 
 #[derive(Event)]
 struct PlayerSettingsChanged;
@@ -194,7 +196,7 @@ fn title_setup(
 
                                 // Portrait
                                 let pic = title_stuff.pics_human[ rng.gen_range( 0..title_stuff.pics_human.len() ) ].clone();                        
-                                pf_parent.spawn( ImageBundle {
+                                pf_parent.spawn( (ImageBundle {
                                     style: Style {
                                         width: Val::Px( 100.0 * tile_scale ),
                                         height: Val::Px( 100.0 * tile_scale  ),
@@ -202,7 +204,7 @@ fn title_setup(
                                     },
                                     image: UiImage::new( pic ),
                                     ..default()
-                                });
+                                }, PlayerSetting { pnum: i as i32  },  ProfilePic));
 
                                 // Right arrow
                                 pf_parent.spawn((
@@ -215,7 +217,7 @@ fn title_setup(
                                         image: asset_server.load("btn-arrow-right.png" ).into(),
                                         ..default()
                                     },
-                                    PlayerSetting { pnum: i as i32 },   
+                                    PlayerSetting { pnum: i as i32  },   
                                     PlayerSettingsButtonAction::ChangeProfile( 1 ),                                 
                                 ));
 
@@ -416,7 +418,9 @@ fn title_update (
 
 fn player_settings(
     stuff: Res<GoodStuff>,
+    title_stuff: Res<TitleScreenStuff>, 
     mut setting_q: Query<(&Children, &mut BackgroundColor, &PlayerSetting, &PlayerSettingsButtonAction)>,
+    mut profile_pic_q : Query<(&PlayerSetting, &mut UiImage), With<ProfilePic>>,
     mut text_query: Query<&mut Text>,
     mut ev_settings: EventReader<PlayerSettingsChanged>,
 ) {
@@ -449,23 +453,72 @@ fn player_settings(
                 text.sections[0].style.color = txtcolor;
             }            
         }
+
+        // Check that all settings have the right profile pic
+        for (pic_plr, mut pic_img) in &mut profile_pic_q {
+            let pic = match (stuff.player_stuff[ pic_plr.pnum as usize ].ptype) {
+                PlayerType::Local => &title_stuff.pics_human[ stuff.player_stuff[ pic_plr.pnum as usize ].human_profile as usize ],
+                PlayerType::AI => &title_stuff.pics_bot[ stuff.player_stuff[ pic_plr.pnum as usize ].bot_profile as usize ],
+                _ => &title_stuff.pics_human[0], // todo: X pic
+            };
+
+            if (*pic != pic_img.texture) {
+                pic_img.texture = pic.clone();
+            }            
+        }        
     }
 
 }
 
 fn player_settings_action(
+    mut profile_pic_q : Query<(&PlayerSetting, &mut UiImage), With<ProfilePic>>,
+    mut stuff: ResMut<GoodStuff>,
+    title_stuff: Res<TitleScreenStuff>, 
     interaction_query: Query<
         (&Interaction, &PlayerSettingsButtonAction, &PlayerSetting),
         (Changed<Interaction>, With<Button>),
     >,
     mut ev_settings: EventWriter<PlayerSettingsChanged>,
-    mut stuff: ResMut<GoodStuff>,
 ) {
     for (interaction, menu_button_action, player) in &interaction_query {
         if *interaction == Interaction::Pressed {
             match menu_button_action {
                 PlayerSettingsButtonAction::ChangeProfile(inc) => {
-                    println!("Change Profile PLR {} inc {}", player.pnum, *inc );
+                        println!("Change Profile PLR {} inc {}", player.pnum, *inc );
+
+                        for (pic_plr, mut pic_img) in &mut profile_pic_q {
+                            println!("pic plr {} player {}", pic_plr.pnum, player.pnum );
+                            if (pic_plr.pnum == player.pnum ) {
+
+                                if stuff.player_stuff[player.pnum as usize].ptype == PlayerType::Local {
+                                    
+                                    let mut v = stuff.player_stuff[player.pnum as usize].human_profile as i32;
+                                    v += inc;
+                                    if (v < 0) {
+                                        v = title_stuff.pics_human.len() as i32 - 1;
+                                    } else if (v >= title_stuff.pics_human.len() as i32) {
+                                        v = 0;
+                                    }
+
+                                    stuff.player_stuff[player.pnum as usize].human_profile = v;
+                                    pic_img.texture = title_stuff.pics_human[v as usize].clone();
+                                    
+                                } else if stuff.player_stuff[player.pnum as usize].ptype == PlayerType::AI {
+
+                                    let mut v = stuff.player_stuff[player.pnum as usize].bot_profile as i32;
+                                    v += inc;
+                                    if (v < 0) {
+                                        v = title_stuff.pics_bot.len() as i32 - 1;
+                                    } else if (v >= title_stuff.pics_bot.len() as i32) {
+                                        v = 0;
+                                    }
+
+                                    stuff.player_stuff[player.pnum as usize].bot_profile = v;
+                                    //pic_img.texture = title_stuff.pics_bot[v as usize].clone();
+                                
+                            }  // Else NotActive
+                        }
+                    }
                 }
                 
                 PlayerSettingsButtonAction::ChangeMode(mode) => {
@@ -475,9 +528,10 @@ fn player_settings_action(
                         1 => PlayerType::AI,
                         _ => PlayerType::NotActive,
                     };
-                    ev_settings.send( PlayerSettingsChanged );
                 }                
             }
+
+            ev_settings.send( PlayerSettingsChanged );
         }
     }
 }
