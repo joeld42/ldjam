@@ -6,7 +6,7 @@ use bevy::{asset::{AssetMetaCheck, RenderAssetUsages},
 
 use bevy_skein::SkeinPlugin;
 
-use std::{default, f32::consts::PI};
+use std::{collections::{HashMap, HashSet}, default, f32::consts::PI};
 
 //use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
@@ -26,7 +26,7 @@ struct PlayerBoat{
     velocity: Vec3,
 }
 
-#[derive(Component, Reflect, Debug, Default)]
+#[derive(Component, Reflect, Debug, Default, Hash, Eq, PartialEq, Clone)]
 #[reflect(Component)]
 enum Seafloor {
     #[default]
@@ -38,9 +38,21 @@ enum Seafloor {
     Atlantis,
 }
 
+const SHOW_SEAFLOOR_ITEMS: [Seafloor; 5] = [
+    Seafloor::Barrel,
+    Seafloor::Tire,
+    Seafloor::Treasure,
+    Seafloor::Clamshell,
+    Seafloor::Atlantis,
+];
+
+#[derive(Component)]
+struct StatusText;
+
 const SCAN_ROWS : usize = 128;
 const SCAN_RES : usize = 64;
 const SCAN_COLOR: Srgba = Srgba::new(0.255, 0.412, 0.882, 1.0);
+const STATUS_TIMEOUT : f32 = 2.0;
 
 /// Store the image handle that we will draw to, here.
 #[derive(Resource)]
@@ -61,6 +73,8 @@ struct SonarScan {
     row_timeout : f32,
     rows : Vec<ScanRow>,
     max_depth: f32,
+    items: HashSet<Entity>,
+    status_timeout: f32,
 }
 
 fn player_controls(
@@ -178,6 +192,8 @@ fn update_sonar(
     mut images: ResMut<Assets<Image>>,
     mut sonar: ResMut<SonarScan>,
     mut gizmos: Gizmos,
+    mut text: Single<&mut Text, Without<StatusText>>,
+    mut status_text: Single<&mut Text, With<StatusText>>,
     player_q: Query<(&PlayerBoat, &Transform), With<PlayerBoat>>,
 )
 {
@@ -198,17 +214,29 @@ fn update_sonar(
         }
     }
 
-    if !sonar.is_scanning && keys.just_pressed(KeyCode::KeyX ) {
+    if keys.just_pressed(KeyCode::KeyX ) {
 
-        if let Ok((mut pboat, mut pxform)) = player_q.get_single() {
+        if sonar.is_scanning {
+            sonar.status_timeout = STATUS_TIMEOUT;
+            status_text.0 = "Can't search while scanning".to_string();
+        } else {
+            if let Ok((mut pboat, mut pxform)) = player_q.get_single() {
 
-            let filter = |entity| seafloor_q.contains(entity);
-            let settings = RayCastSettings::default().with_filter(&filter);
-            let ray = Ray3d::new(pxform.translation + Vec3 { x: 0.0, y: 100.0, z: 0.0 }, Dir3::NEG_Y);
-            let hits = ray_cast.cast_ray(ray, &settings);
-            if let Some((ent, hit)) = hits.first() {
-                if let Ok(seafloor) = seafloor_q.get(*ent) {
-                    println!("Hit {:?}", seafloor );
+                let filter = |entity| seafloor_q.contains(entity);
+                let settings = RayCastSettings::default().with_filter(&filter);
+                let ray = Ray3d::new(pxform.translation + Vec3 { x: 0.0, y: 100.0, z: 0.0 }, Dir3::NEG_Y);
+                let hits = ray_cast.cast_ray(ray, &settings);
+                if let Some((ent, hit)) = hits.first() {
+                    if let Ok(seafloor) = seafloor_q.get(*ent) {
+                        println!("Hit {:?}", seafloor );
+                        sonar.items.insert( *ent );
+
+                        sonar.status_timeout = STATUS_TIMEOUT;
+                        status_text.0 = match seafloor {
+                                Seafloor::Seabed => "Nothing found".to_string(),
+                                _ => format!("Found {:?}", seafloor),
+                            };
+                    }
                 }
             }
         }
@@ -336,6 +364,50 @@ fn update_sonar(
         gizmos.line(row.pos_a, row.pos_b, SCAN_COLOR * (5.0 + (age*age) * 20.0) );
 
     }
+
+
+    // Items located (could do  this better but panic mode)
+    let mut item_count: HashMap<Seafloor, u32> = HashMap::new();
+
+    for &entity in &sonar.items {
+        if let Ok(seafloor) = seafloor_q.get(entity) {
+            *item_count.entry(seafloor.clone()).or_insert(0) += 1;
+        }
+    }
+
+    // Status Text
+    if sonar.status_timeout <= 0.0 {
+        if sonar.is_scanning {
+            let scan_pct = sonar.curr_row as f32 / SCAN_ROWS as f32;
+            status_text.0 = format!("Scanning {:}%...", (scan_pct*100.0).floor() ).to_string();
+        } else {
+            status_text.0 = "Press Z to scan and X to search.".to_string();
+        }
+    } else {
+        sonar.status_timeout -= time.delta_secs();
+    }
+
+
+    // Score text
+    text.0 = "Items Found:\n".to_string();
+    // Display the counts
+    //for (category, count) in &item_count {
+        //println!("{:?}: {}", category, count);
+        //text.push_str( &format!( "{:?}: {}\n", category, count) );
+    //}
+
+    for item in SHOW_SEAFLOOR_ITEMS {
+        let count = item_count.get(&item).unwrap_or(&0);
+        if *count == 0 {
+            text.push_str(  "0 - ?????? \n" );
+        } else {
+            text.push_str( &format!( "{:} - {:?}\n", count, item ) );
+        }
+    }
+
+
+
+
 }
 
 fn resize_notificator(mut events: EventReader<WindowResized>) {
@@ -559,6 +631,30 @@ fn startup(
     //     Sprite::from_image(asset_server.load("bevy_bird_dark.png")),
     //     Transform::from_xyz(-200., 0., 0.),
     // ));
+
+    // UI
+    commands.spawn((
+        Text::default(),
+        Node {
+            position_type: PositionType::Absolute,
+            top: Val::Px(12.0),
+            left: Val::Px(12.0),
+            ..default()
+        },
+        RenderLayers::layer(1),
+    ));
+
+    commands.spawn((
+        Text::default(),
+        Node {
+            position_type: PositionType::Absolute,
+            top: Val::Px(12.0),
+            left: Val::Px(300.0),
+            ..default()
+        },
+        RenderLayers::layer(1),
+        StatusText
+    ));
 
 
 }
