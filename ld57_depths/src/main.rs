@@ -6,7 +6,7 @@ use bevy::{asset::{AssetMetaCheck, RenderAssetUsages},
 
 use bevy_skein::SkeinPlugin;
 
-use std::f32::consts::PI;
+use std::{default, f32::consts::PI};
 
 //use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
@@ -28,7 +28,15 @@ struct PlayerBoat{
 
 #[derive(Component, Reflect, Debug, Default)]
 #[reflect(Component)]
-struct Seafloor;
+enum Seafloor {
+    #[default]
+    Seabed,
+    Barrel,
+    Tire,
+    Treasure,
+    Clamshell,
+    Atlantis,
+}
 
 const SCAN_ROWS : usize = 128;
 const SCAN_RES : usize = 64;
@@ -52,6 +60,7 @@ struct SonarScan {
     curr_row : usize,
     row_timeout : f32,
     rows : Vec<ScanRow>,
+    max_depth: f32,
 }
 
 fn player_controls(
@@ -164,7 +173,7 @@ fn update_sonar(
     time: Res<Time>,
     keys: Res<ButtonInput<KeyCode>>,
     sonar_img: Res<SonarImage>,
-    terrain_q: Query<(), With<Seafloor>>,
+    seafloor_q: Query<&Seafloor>,
     mut ray_cast: MeshRayCast,
     mut images: ResMut<Assets<Image>>,
     mut sonar: ResMut<SonarScan>,
@@ -176,7 +185,7 @@ fn update_sonar(
     // let width = window.resolution.width();
     // println!("Window width is {:}", width );
 
-    if keys.just_pressed(KeyCode::Space) {
+    if keys.just_pressed(KeyCode::Space) || keys.just_pressed(KeyCode::KeyZ ) {
         // Space was pressed
         if sonar.is_scanning {
             println!( "Already scanning...");
@@ -185,8 +194,26 @@ fn update_sonar(
             sonar.is_scanning = true;
             sonar.curr_row = 0;
             sonar.row_timeout = 0.0;
+            sonar.max_depth = 0.0;
         }
     }
+
+    if !sonar.is_scanning && keys.just_pressed(KeyCode::KeyX ) {
+
+        if let Ok((mut pboat, mut pxform)) = player_q.get_single() {
+
+            let filter = |entity| seafloor_q.contains(entity);
+            let settings = RayCastSettings::default().with_filter(&filter);
+            let ray = Ray3d::new(pxform.translation + Vec3 { x: 0.0, y: 100.0, z: 0.0 }, Dir3::NEG_Y);
+            let hits = ray_cast.cast_ray(ray, &settings);
+            if let Some((ent, hit)) = hits.first() {
+                if let Ok(seafloor) = seafloor_q.get(*ent) {
+                    println!("Hit {:?}", seafloor );
+                }
+            }
+        }
+    }
+
 
     let now = time.elapsed_secs();
     let scan_interval = 0.1; // time in seconds
@@ -199,6 +226,9 @@ fn update_sonar(
 
 
             if let Ok((mut pboat, mut pxform)) = player_q.get_single() {
+
+                let filter = |entity| seafloor_q.contains(entity);
+                let settings = RayCastSettings::default().with_filter(&filter);
 
 
                 let scan_width = 5.0;
@@ -218,10 +248,28 @@ fn update_sonar(
                 let palC = Vec3{ x : 1.0, y : 1.0, z : 0.5 };
                 let palD = Vec3{ x : 0.8, y : 0.9, z : 0.3 };
 
+                let palAhit = Vec3{ x : 0.5, y : 0.5, z : 0.5 };
+                let palBhit = Vec3{ x : 0.5, y : 0.5, z : 0.5 };
+                let palChit = Vec3{ x : 1.0, y : 1.0, z : 1.0 };
+                let palDhit = Vec3{ x : 0.0, y : 0.33, z : 0.67 };
+
+
+
                 // Get the image from Bevy's asset storage.
-                let filter = |entity| terrain_q.contains(entity);
-                let settings = RayCastSettings::default().with_filter(&filter);
                 let image = images.get_mut(&sonar_img.0).expect("Image not found");
+
+                if next_row==0 {
+                    // clear the image if we're starting a new scan
+                    let clear_color = Color::srgb_u8(0, 0, 0);
+                    for j in 0..SCAN_RES {
+                        for i in 0..SCAN_ROWS {
+                            image
+                                .set_color_at( i as u32, j as u32, clear_color )
+                                .unwrap();
+                        }
+                    }
+                }
+
                 for pp in 0..SCAN_RES {
 
                     let pt = (pp as f32) / (SCAN_RES as f32);
@@ -230,16 +278,35 @@ fn update_sonar(
                     let ray = Ray3d::new(p + Vec3 { x: 0.0, y: 100.0, z: 0.0 }, Dir3::NEG_Y);
                     let hits = ray_cast.cast_ray(ray, &settings);
 
-                    let shallow = Color::srgb( 0.0, 0.5, 1.0 );
-                    let deep = Color::srgb( 1.0, 0.7, 0.0 );
                     let mut scan_col = Color::srgb_u8(97,72, 60 );
-                    if let Some((_ent, hit)) = hits.first() {
+                    if let Some((ent, hit)) = hits.first() {
+
+
                         let dist = hit.distance - 100.0;
-                        if (dist > 0.0) {
-                            let t = (dist / 10.0).clamp( 0.0, 1.0);
+                        if dist > 0.0 {
+                            let t = (dist / 20.0).clamp( 0.0, 1.0);
                             //scan_col = shallow.mix( &deep, t );
-                            let cc = pal( t, palA, palB, palC, palD );
-                            scan_col = Color::srgb( cc.x, cc.y, cc.z );
+                            //let cc = pal( t, palA, palB, palC, palD );
+
+                            scan_col = if let Ok(seafloor) = seafloor_q.get(*ent) {
+
+                                //println!("Seafloor: {:?}", seafloor );
+
+                                let cc = match seafloor {
+                                    Seafloor::Seabed => { pal( t, palA, palB, palC, palD ) * 0.6 }
+                                    default => { pal( t, palAhit, palBhit, palChit, palDhit ) }
+                                };
+                                Color::srgb( cc.x, cc.y, cc.z )
+                            } else {
+                                Color::srgb_u8(97,72, 60 )
+                            };
+
+                            if dist > sonar.max_depth {
+                                sonar.max_depth = dist;
+                            }
+
+
+                            //scan_col = Color::srgb( cc.x, cc.y, cc.z );
                         }
                     }
 
@@ -255,6 +322,7 @@ fn update_sonar(
                 //println!("Scanned row {:}", sonar.curr_row );
                 if sonar.curr_row >= SCAN_ROWS {
                     sonar.is_scanning = false;
+                    println!("Max depth for scan is {:}", sonar.max_depth );
                 }
             }
         }
