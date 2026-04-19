@@ -3,13 +3,14 @@ entity = {
     {
       color = [1 0.999995 0.999996 1] // color
       font = "luxe: font/lato-bold"
+      size = 24
       type = "luxe: system/text.modifier"
     }
     {
       link = [
         "fe38656f-2a39-4763-80d8-d3d1d1540013"
       ] // link
-      pos = [0 91 100] // pos
+      pos = [4 91 3] // pos
       type = "luxe: system/transform.modifier"
     }
   ] // modifiers

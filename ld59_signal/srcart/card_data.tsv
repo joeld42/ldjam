@@ -1,0 +1,6 @@
+Card Id	Title	Text	Tags	PromptRight	PromptLeft
+starter	Station Head	Good Morning, Control. Welcome to station. Your first order of business should be rebuilding our network, recent events have left us somewhat thin.		Understood.	
+anais	Anais	Anais runs a flower shop in the old city. She sends coded messages to $AGENT by arranging the window display.			
+anais-in-danger	In Danger	Anais put four red carnations in the window display. That's her emergency signal!		Send an extraction team. Let's get her to safety. Cmd:Extract()	Stop in to her shop. See what she needs. Cmd:Remove(anais) Cmd:Add(anais-captured) 
+anais-captured	Anais Captured	Anais captured text		Dammit.	
+paranoia	Paranoia Strikes Deep	$ASSET reports feeling as if they are being watched.		They should go to ground for a while. Cmd:Discard($ASSET)	It's nothing.  Cmd:SusUp(50%)

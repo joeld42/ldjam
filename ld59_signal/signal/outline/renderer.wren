@@ -41,7 +41,9 @@ class Renderer {
   game_render_path(ctx) {
 
     var layer = RenderLayerDesc.new()
-        layer.sort = SortType.none
+        // layer.sort = SortType.none
+        layer.sort = SortType.sort_by_z_reverse
+
         layer.dest.color[0].render_target = "scene"
         layer.dest.color[0].clear_color = ctx.get("clear_color", [1,1,1,1])
         layer.dest.color[0].load_action = LoadAction.clear
@@ -54,7 +56,6 @@ class Renderer {
   display_render_path(ctx) {
 
     var layer = RenderLayerDesc.new()
-        layer.sort = SortType.none
         layer.dest.color[0].clear_color = ctx.get("border", [0,0,0,1])
         layer.dest.color[0].load_action = LoadAction.clear
         layer.dest.depth.load_action = LoadAction.clear
@@ -66,7 +67,7 @@ class Renderer {
   ui_render_path(ctx) {
 
     var layer = RenderLayerDesc.new()
-        layer.sort = SortType.none
+
         layer.dest.color[0].load_action = LoadAction.dont_care
         layer.dest.depth.load_action = LoadAction.clear
 

@@ -1,4 +1,12 @@
 card = {
-    title = "Station Head"
-    text = "Good Morning, Control. Welcome to station. Your first order of business should be rebuilding our network, recent events have left us somewhat thin."
-}
+  title = "Station Head"
+  text = "Good Morning, Control. Welcome to station. Your first order of business should be rebuilding our network, recent events have left us somewhat thin."
+    outcomes = [      {
+         id = "j6AY0K"
+         value = {
+            prompt = "Understood."
+            cmds = ""
+         } // value
+      } // outcome
+    ] // outcomes} // card
+

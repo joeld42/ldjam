@@ -12,7 +12,7 @@ entity = {
       link = [
         "8628caca-0a93-46b4-b717-c3022c99100a"
       ] // link
-      pos = [178 -52 2] // pos
+      pos = [98 -52 2] // pos
       type = "luxe: system/transform.modifier"
     }
   ] // modifiers

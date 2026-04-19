@@ -1,0 +1,12 @@
+card = {
+  title = "Anais Captured"
+  text = "Anais captured text"
+    outcomes = [      {
+         id = "DkJpna"
+         value = {
+            prompt = "Dammit."
+            cmds = ""
+         } // value
+      } // outcome
+    ] // outcomes} // card
+

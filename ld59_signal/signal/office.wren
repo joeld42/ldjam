@@ -42,11 +42,12 @@ class Office {
 
         var cardTitle = Entity.create( world, "title")
         Transform.create( cardTitle, 85, 50, 50)
-        Text.create( cardTitle, Assets.material("luxe: material/font"), 36, Asset.font("luxe: font/lato"),
+        Text.create( cardTitle, Assets.material("luxe: material/font"), 36,
+            Asset.font("luxe: font/lato"),
                 [1,1,1,1])
         Text.set_text( cardTitle, "Card Title")
         //Sprite.create(cardTitle, Assets.image("image/cardframe"), 0, 70 )
-        // Transform.link( cardTitle, _swipecard )
+         Transform.link( cardTitle, _swipecard )
 
     }
 
