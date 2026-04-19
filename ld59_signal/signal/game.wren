@@ -20,6 +20,7 @@ import "outline/ready" for Ready
 
 import "mainmenu" for MainMenu
 import "office" for Office
+import "citygame" for CityGame
 
 class Game is Ready {
 
@@ -54,7 +55,8 @@ class Game is Ready {
         Log.print("Hello from CB Start!")
         Frame.end {
           _mode.teardown()
-          _mode = Office.new( world, camera )
+          //_mode = Office.new( world, camera )
+          _mode = CityGame.new( world, camera )
         }
 
       })

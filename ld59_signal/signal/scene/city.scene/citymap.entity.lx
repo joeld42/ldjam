@@ -1,0 +1,11 @@
+entity = {
+  modifiers = [
+    {
+      tiles = "tiles/citytiles"
+      type = "luxe: system/tiles.modifier"
+    }
+  ] // modifiers
+  name = "citymap"
+  uuid = "110ede21-7df6-4f48-98c8-e34f273411c3"
+  visible = true
+} // entity

@@ -1,0 +1,1346 @@
+tiles = {
+  background_color = [0.06 0.06 0.06 1] // background_color
+  grid = [16 16] // grid
+  tiles = [
+    {
+      id = "ogWc0U"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [0 -2] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "sO42qU"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [0 -1] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "kkMKMe"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [0 0] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "KKAYC4"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [0 1] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "MWSsOA"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [1 1] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "Uc4qKW"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [1 0] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "EAuO66"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [1 -1] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "kKageS"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [1 -2] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "AK0Kcq"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [0 2] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "w62YM4"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [0 3] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "AQ4W4a"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [1 3] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "Wy6oOY"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [1 4] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 10"
+        } // visual
+      } // value
+    }
+    {
+      id = "8qWowc"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [1 2] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "WCMIc0"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [0 4] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 10"
+        } // visual
+      } // value
+    }
+    {
+      id = "EGKwSa"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-3 -3] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "yEAae0"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-2 -3] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "yWmKcu"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-1 -3] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "6qAAGC"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [0 -3] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "q0cEiQ"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [1 -3] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "e66WaG"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [2 -3] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "I8sMmS"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [3 -3] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "YySqQm"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [4 -3] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "EUKACu"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [5 -3] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "AAOKO0"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [6 -3] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 9"
+        } // visual
+      } // value
+    }
+    {
+      id = "AoEWgW"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [6 -4] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 9"
+        } // visual
+      } // value
+    }
+    {
+      id = "46AWSc"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [5 -4] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "2Gsoku"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [4 -4] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 2"
+        } // visual
+      } // value
+    }
+    {
+      id = "4aMCME"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [3 -4] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "iImO6u"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [2 -4] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 2"
+        } // visual
+      } // value
+    }
+    {
+      id = "oWegGm"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [1 -4] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "IAWoAe"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [0 -4] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 2"
+        } // visual
+      } // value
+    }
+    {
+      id = "2M8eAq"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-1 -4] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "sOyYUA"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-2 -4] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 2"
+        } // visual
+      } // value
+    }
+    {
+      id = "uw6gsq"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-3 -4] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 32"
+        } // visual
+      } // value
+    }
+    {
+      id = "2wKQSK"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [2 -2] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 35"
+        } // visual
+      } // value
+    }
+    {
+      id = "QsiIGg"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [3 -2] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 37"
+        } // visual
+      } // value
+    }
+    {
+      id = "cOoymK"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [4 -2] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 36"
+        } // visual
+      } // value
+    }
+    {
+      id = "I28Kqm"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [5 -2] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 36"
+        } // visual
+      } // value
+    }
+    {
+      id = "awKyEU"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [2 -1] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 11"
+        } // visual
+      } // value
+    }
+    {
+      id = "sIESmA"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-1 -2] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        tags = [
+          {
+            id = "E0KQUw"
+            value = "solid"
+          }
+        ] // tags
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 68"
+        } // visual
+      } // value
+    }
+    {
+      id = "iUCwGg"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-2 -2] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        tags = [
+          {
+            id = "cwm0IC"
+            value = "solid"
+          }
+        ] // tags
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 68"
+        } // visual
+      } // value
+    }
+    {
+      id = "cWw4KU"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-3 -2] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        tags = [
+          {
+            id = "G6gKEG"
+            value = "solid"
+          }
+        ] // tags
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 68"
+        } // visual
+      } // value
+    }
+    {
+      id = "QkEy8S"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-3 -1] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        tags = [
+          {
+            id = "q4QcUK"
+            value = "solid"
+          }
+        ] // tags
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 52"
+        } // visual
+      } // value
+    }
+    {
+      id = "ee64Ui"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-2 -1] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        tags = [
+          {
+            id = "IOKiM2"
+            value = "solid"
+          }
+        ] // tags
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 52"
+        } // visual
+      } // value
+    }
+    {
+      id = "uiUMOU"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-1 -1] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        tags = [
+          {
+            id = "8i8awu"
+            value = "solid"
+          }
+        ] // tags
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 52"
+        } // visual
+      } // value
+    }
+    {
+      id = "yQM4Ki"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-1 0] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        tags = [
+          {
+            id = "MEWAc6"
+            value = "solid"
+          }
+        ] // tags
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 52"
+        } // visual
+      } // value
+    }
+    {
+      id = "02OCkQ"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-2 0] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        tags = [
+          {
+            id = "gIUEMc"
+            value = "solid"
+          }
+        ] // tags
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 52"
+        } // visual
+      } // value
+    }
+    {
+      id = "KoKo6Q"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-3 0] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        tags = [
+          {
+            id = "souIIY"
+            value = "solid"
+          }
+        ] // tags
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 52"
+        } // visual
+      } // value
+    }
+    {
+      id = "g8Yoqa"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [2 3] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 72"
+        } // visual
+      } // value
+    }
+    {
+      id = "qqs8sK"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [3 3] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 73"
+        } // visual
+      } // value
+    }
+    {
+      id = "ywoams"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [4 3] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 74"
+        } // visual
+      } // value
+    }
+    {
+      id = "EgY80g"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [5 3] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 74"
+        } // visual
+      } // value
+    }
+    {
+      id = "2ewEac"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [6 3] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 73"
+        } // visual
+      } // value
+    }
+    {
+      id = "suIUq2"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [2 2] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 80"
+        } // visual
+      } // value
+    }
+    {
+      id = "wqGYKA"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [2 1] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 80"
+        } // visual
+      } // value
+    }
+    {
+      id = "UuokO0"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-3 1] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        tags = [
+          {
+            id = "gC0kEI"
+            value = "solid"
+          }
+        ] // tags
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 52"
+        } // visual
+      } // value
+    }
+    {
+      id = "wYywaI"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-2 1] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        tags = [
+          {
+            id = "aY4wcu"
+            value = "solid"
+          }
+        ] // tags
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 52"
+        } // visual
+      } // value
+    }
+    {
+      id = "SWewGc"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-1 1] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        tags = [
+          {
+            id = "e0kqgw"
+            value = "solid"
+          }
+        ] // tags
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 44"
+        } // visual
+      } // value
+    }
+    {
+      id = "i6eE4i"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-3 2] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        tags = [
+          {
+            id = "wmk8Ei"
+            value = "solid"
+          }
+        ] // tags
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 44"
+        } // visual
+      } // value
+    }
+    {
+      id = "A4Q0wE"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-2 2] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        tags = [
+          {
+            id = "MCCCKB"
+            value = "solid"
+          }
+        ] // tags
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 44"
+        } // visual
+      } // value
+    }
+    {
+      id = "4cqwqY"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-1 2] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        tags = [
+          {
+            id = "cauquG"
+            value = "solid"
+          }
+        ] // tags
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 88"
+        } // visual
+      } // value
+    }
+    {
+      id = "E4sqay"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [4 0] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 1"
+        } // visual
+      } // value
+    }
+    {
+      id = "oaswoe"
+      value = {
+        angle = 270
+        color = [1 1 1 1] // color
+        coord = [5 0] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 1"
+        } // visual
+      } // value
+    }
+    {
+      id = "4K28cq"
+      value = {
+        angle = 180
+        color = [1 1 1 1] // color
+        coord = [6 0] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 1"
+        } // visual
+      } // value
+    }
+    {
+      id = "sseQ4G"
+      value = {
+        angle = 90
+        color = [1 1 1 1] // color
+        coord = [7 0] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 1"
+        } // visual
+      } // value
+    }
+    {
+      id = "2cY48e"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-7 2] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 12"
+        } // visual
+      } // value
+    }
+    {
+      id = "IKKcsM"
+      value = {
+        angle = 270
+        color = [1 1 1 1] // color
+        coord = [-6 2] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 3"
+        } // visual
+      } // value
+    }
+    {
+      id = "gGKKa2"
+      value = {
+        angle = 180
+        color = [1 1 1 1] // color
+        coord = [-6 1] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 3"
+        } // visual
+      } // value
+    }
+    {
+      id = "WwE2cw"
+      value = {
+        angle = 90
+        color = [1 1 1 1] // color
+        coord = [-7 1] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 3"
+        } // visual
+      } // value
+    }
+    {
+      id = "YcSC0o"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-7 4] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 12"
+        } // visual
+      } // value
+    }
+    {
+      id = "q4muQC"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-7 3] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 12"
+        } // visual
+      } // value
+    }
+    {
+      id = "kmmUOa"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-8 3] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 12"
+        } // visual
+      } // value
+    }
+    {
+      id = "EUwiQG"
+      value = {
+        angle = 0
+        color = [1 1 1 1] // color
+        coord = [-6 3] // coord
+        depth = 0
+        flip_h = false
+        flip_v = false
+        offset = [0 0] // offset
+        size = [16 16] // size
+        visual = {
+          local_id = "citytiles-visual"
+          visual_id = "galletcity_tiles > 12"
+        } // visual
+      } // value
+    }
+  ] // tiles
+  visuals = [
+    {
+      id = "kskmcM"
+      value = {
+        asset = "tiles/citytiles-visual"
+        local_id = "citytiles-visual"
+      } // value
+    }
+  ] // visuals
+} // tiles

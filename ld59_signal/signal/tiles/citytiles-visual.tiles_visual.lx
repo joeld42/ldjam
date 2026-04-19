@@ -1,0 +1,1526 @@
+tiles_visual = {
+  sources = [
+    {
+      id = "icuwUE"
+      value = {
+        id = "galletcity_tiles > 0"
+        image = "image/galletcity_tiles"
+        pixelated = true
+      } // value
+    }
+  ] // sources
+  visuals = [
+    {
+      id = "mEiS0o"
+      value = {
+        id = "galletcity_tiles > 0"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0 0.125 0.047619] // uv
+      } // value
+    }
+    {
+      id = "AM6ueM"
+      value = {
+        id = "galletcity_tiles > 1"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0 0.25 0.047619] // uv
+      } // value
+    }
+    {
+      id = "uOIgaE"
+      value = {
+        id = "galletcity_tiles > 2"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0 0.375 0.047619] // uv
+      } // value
+    }
+    {
+      id = "wkAyMM"
+      value = {
+        id = "galletcity_tiles > 3"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0 0.5 0.047619] // uv
+      } // value
+    }
+    {
+      id = "2WO8WO"
+      value = {
+        id = "galletcity_tiles > 4"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0 0.625 0.047619] // uv
+      } // value
+    }
+    {
+      id = "ioi2yQ"
+      value = {
+        id = "galletcity_tiles > 5"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0 0.75 0.047619] // uv
+      } // value
+    }
+    {
+      id = "2oiqyu"
+      value = {
+        id = "galletcity_tiles > 6"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0 0.875 0.047619] // uv
+      } // value
+    }
+    {
+      id = "CCEmg2"
+      value = {
+        id = "galletcity_tiles > 7"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0 1 0.047619] // uv
+      } // value
+    }
+    {
+      id = "EC28Gs"
+      value = {
+        id = "galletcity_tiles > 8"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0.047619 0.125 0.095238] // uv
+      } // value
+    }
+    {
+      id = "Wasg0A"
+      value = {
+        id = "galletcity_tiles > 9"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0.047619 0.25 0.095238] // uv
+      } // value
+    }
+    {
+      id = "WqmaOa"
+      value = {
+        id = "galletcity_tiles > 10"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0.047619 0.375 0.095238] // uv
+      } // value
+    }
+    {
+      id = "W8GiGU"
+      value = {
+        id = "galletcity_tiles > 11"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0.047619 0.5 0.095238] // uv
+      } // value
+    }
+    {
+      id = "cYG8k4"
+      value = {
+        id = "galletcity_tiles > 12"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0.047619 0.625 0.095238] // uv
+      } // value
+    }
+    {
+      id = "yGOmqI"
+      value = {
+        id = "galletcity_tiles > 13"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0.047619 0.75 0.095238] // uv
+      } // value
+    }
+    {
+      id = "8K8844"
+      value = {
+        id = "galletcity_tiles > 14"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0.047619 0.875 0.095238] // uv
+      } // value
+    }
+    {
+      id = "imq84c"
+      value = {
+        id = "galletcity_tiles > 15"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0.047619 1 0.095238] // uv
+      } // value
+    }
+    {
+      id = "28OUsm"
+      value = {
+        id = "galletcity_tiles > 16"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0.095238 0.125 0.142857] // uv
+      } // value
+    }
+    {
+      id = "SSQ20g"
+      value = {
+        id = "galletcity_tiles > 17"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0.095238 0.25 0.142857] // uv
+      } // value
+    }
+    {
+      id = "um68QW"
+      value = {
+        id = "galletcity_tiles > 18"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0.095238 0.375 0.142857] // uv
+      } // value
+    }
+    {
+      id = "c8OaaO"
+      value = {
+        id = "galletcity_tiles > 19"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0.095238 0.5 0.142857] // uv
+      } // value
+    }
+    {
+      id = "s8US4U"
+      value = {
+        id = "galletcity_tiles > 20"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0.095238 0.625 0.142857] // uv
+      } // value
+    }
+    {
+      id = "S8CIOo"
+      value = {
+        id = "galletcity_tiles > 21"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0.095238 0.75 0.142857] // uv
+      } // value
+    }
+    {
+      id = "84saSo"
+      value = {
+        id = "galletcity_tiles > 22"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0.095238 0.875 0.142857] // uv
+      } // value
+    }
+    {
+      id = "0kksAq"
+      value = {
+        id = "galletcity_tiles > 23"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0.095238 1 0.142857] // uv
+      } // value
+    }
+    {
+      id = "yGIGMO"
+      value = {
+        id = "galletcity_tiles > 24"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0.142857 0.125 0.190476] // uv
+      } // value
+    }
+    {
+      id = "muaeEs"
+      value = {
+        id = "galletcity_tiles > 25"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0.142857 0.25 0.190476] // uv
+      } // value
+    }
+    {
+      id = "MEmiKs"
+      value = {
+        id = "galletcity_tiles > 26"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0.142857 0.375 0.190476] // uv
+      } // value
+    }
+    {
+      id = "Yuis6k"
+      value = {
+        id = "galletcity_tiles > 27"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0.142857 0.5 0.190476] // uv
+      } // value
+    }
+    {
+      id = "2Ymky8"
+      value = {
+        id = "galletcity_tiles > 28"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0.142857 0.625 0.190476] // uv
+      } // value
+    }
+    {
+      id = "aWWWem"
+      value = {
+        id = "galletcity_tiles > 29"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0.142857 0.75 0.190476] // uv
+      } // value
+    }
+    {
+      id = "YmCS8q"
+      value = {
+        id = "galletcity_tiles > 30"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0.142857 0.875 0.190476] // uv
+      } // value
+    }
+    {
+      id = "Y6aQ28"
+      value = {
+        id = "galletcity_tiles > 31"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0.142857 1 0.190476] // uv
+      } // value
+    }
+    {
+      id = "8OWkWm"
+      value = {
+        id = "galletcity_tiles > 32"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0.190476 0.125 0.238095] // uv
+      } // value
+    }
+    {
+      id = "Su80c0"
+      value = {
+        id = "galletcity_tiles > 33"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0.190476 0.25 0.238095] // uv
+      } // value
+    }
+    {
+      id = "mACEO2"
+      value = {
+        id = "galletcity_tiles > 34"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0.190476 0.375 0.238095] // uv
+      } // value
+    }
+    {
+      id = "MsaMCk"
+      value = {
+        id = "galletcity_tiles > 35"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0.190476 0.5 0.238095] // uv
+      } // value
+    }
+    {
+      id = "26cwKs"
+      value = {
+        id = "galletcity_tiles > 36"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0.190476 0.625 0.238095] // uv
+      } // value
+    }
+    {
+      id = "Mmc20E"
+      value = {
+        id = "galletcity_tiles > 37"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0.190476 0.75 0.238095] // uv
+      } // value
+    }
+    {
+      id = "4qWQiM"
+      value = {
+        id = "galletcity_tiles > 38"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0.190476 0.875 0.238095] // uv
+      } // value
+    }
+    {
+      id = "cwiwQk"
+      value = {
+        id = "galletcity_tiles > 39"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0.190476 1 0.238095] // uv
+      } // value
+    }
+    {
+      id = "o6Uwki"
+      value = {
+        id = "galletcity_tiles > 40"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0.238095 0.125 0.285714] // uv
+      } // value
+    }
+    {
+      id = "46USYK"
+      value = {
+        id = "galletcity_tiles > 41"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0.238095 0.25 0.285714] // uv
+      } // value
+    }
+    {
+      id = "2CG6Ue"
+      value = {
+        id = "galletcity_tiles > 42"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0.238095 0.375 0.285714] // uv
+      } // value
+    }
+    {
+      id = "qqmyGY"
+      value = {
+        id = "galletcity_tiles > 43"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0.238095 0.5 0.285714] // uv
+      } // value
+    }
+    {
+      id = "cA6eC8"
+      value = {
+        id = "galletcity_tiles > 44"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0.238095 0.625 0.285714] // uv
+      } // value
+    }
+    {
+      id = "omIi8I"
+      value = {
+        id = "galletcity_tiles > 45"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0.238095 0.75 0.285714] // uv
+      } // value
+    }
+    {
+      id = "WyM8Cu"
+      value = {
+        id = "galletcity_tiles > 46"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0.238095 0.875 0.285714] // uv
+      } // value
+    }
+    {
+      id = "8SIg0e"
+      value = {
+        id = "galletcity_tiles > 47"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0.238095 1 0.285714] // uv
+      } // value
+    }
+    {
+      id = "SIA2W6"
+      value = {
+        id = "galletcity_tiles > 48"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0.285714 0.125 0.333333] // uv
+      } // value
+    }
+    {
+      id = "0E8uMe"
+      value = {
+        id = "galletcity_tiles > 49"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0.285714 0.25 0.333333] // uv
+      } // value
+    }
+    {
+      id = "icQkC6"
+      value = {
+        id = "galletcity_tiles > 50"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0.285714 0.375 0.333333] // uv
+      } // value
+    }
+    {
+      id = "eeWEIk"
+      value = {
+        id = "galletcity_tiles > 51"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0.285714 0.5 0.333333] // uv
+      } // value
+    }
+    {
+      id = "kUA8sy"
+      value = {
+        id = "galletcity_tiles > 52"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0.285714 0.625 0.333333] // uv
+      } // value
+    }
+    {
+      id = "gOUgMe"
+      value = {
+        id = "galletcity_tiles > 53"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0.285714 0.75 0.333333] // uv
+      } // value
+    }
+    {
+      id = "WueAUQ"
+      value = {
+        id = "galletcity_tiles > 54"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0.285714 0.875 0.333333] // uv
+      } // value
+    }
+    {
+      id = "Qu2WEM"
+      value = {
+        id = "galletcity_tiles > 55"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0.285714 1 0.333333] // uv
+      } // value
+    }
+    {
+      id = "iOQKuw"
+      value = {
+        id = "galletcity_tiles > 56"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0.333333 0.125 0.380952] // uv
+      } // value
+    }
+    {
+      id = "cssgUY"
+      value = {
+        id = "galletcity_tiles > 57"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0.333333 0.25 0.380952] // uv
+      } // value
+    }
+    {
+      id = "wUSCaY"
+      value = {
+        id = "galletcity_tiles > 58"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0.333333 0.375 0.380952] // uv
+      } // value
+    }
+    {
+      id = "EO2AA2"
+      value = {
+        id = "galletcity_tiles > 59"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0.333333 0.5 0.380952] // uv
+      } // value
+    }
+    {
+      id = "eusSgy"
+      value = {
+        id = "galletcity_tiles > 60"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0.333333 0.625 0.380952] // uv
+      } // value
+    }
+    {
+      id = "OaMwS8"
+      value = {
+        id = "galletcity_tiles > 61"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0.333333 0.75 0.380952] // uv
+      } // value
+    }
+    {
+      id = "uaeKMy"
+      value = {
+        id = "galletcity_tiles > 62"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0.333333 0.875 0.380952] // uv
+      } // value
+    }
+    {
+      id = "cqskSa"
+      value = {
+        id = "galletcity_tiles > 63"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0.333333 1 0.380952] // uv
+      } // value
+    }
+    {
+      id = "022GqY"
+      value = {
+        id = "galletcity_tiles > 64"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0.380952 0.125 0.428571] // uv
+      } // value
+    }
+    {
+      id = "Yssqsw"
+      value = {
+        id = "galletcity_tiles > 65"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0.380952 0.25 0.428571] // uv
+      } // value
+    }
+    {
+      id = "uwyIgA"
+      value = {
+        id = "galletcity_tiles > 66"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0.380952 0.375 0.428571] // uv
+      } // value
+    }
+    {
+      id = "2QkgGA"
+      value = {
+        id = "galletcity_tiles > 67"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0.380952 0.5 0.428571] // uv
+      } // value
+    }
+    {
+      id = "4WoUug"
+      value = {
+        id = "galletcity_tiles > 68"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0.380952 0.625 0.428571] // uv
+      } // value
+    }
+    {
+      id = "8KAUkk"
+      value = {
+        id = "galletcity_tiles > 69"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0.380952 0.75 0.428571] // uv
+      } // value
+    }
+    {
+      id = "WoK4gI"
+      value = {
+        id = "galletcity_tiles > 70"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0.380952 0.875 0.428571] // uv
+      } // value
+    }
+    {
+      id = "kYQw2K"
+      value = {
+        id = "galletcity_tiles > 71"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0.380952 1 0.428571] // uv
+      } // value
+    }
+    {
+      id = "yIWC8I"
+      value = {
+        id = "galletcity_tiles > 72"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0.428571 0.125 0.47619] // uv
+      } // value
+    }
+    {
+      id = "S4Miws"
+      value = {
+        id = "galletcity_tiles > 73"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0.428571 0.25 0.47619] // uv
+      } // value
+    }
+    {
+      id = "OuQcqA"
+      value = {
+        id = "galletcity_tiles > 74"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0.428571 0.375 0.47619] // uv
+      } // value
+    }
+    {
+      id = "CWMgyA"
+      value = {
+        id = "galletcity_tiles > 75"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0.428571 0.5 0.47619] // uv
+      } // value
+    }
+    {
+      id = "Uuo8AI"
+      value = {
+        id = "galletcity_tiles > 76"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0.428571 0.625 0.47619] // uv
+      } // value
+    }
+    {
+      id = "gcKAQA"
+      value = {
+        id = "galletcity_tiles > 77"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0.428571 0.75 0.47619] // uv
+      } // value
+    }
+    {
+      id = "QKsOmO"
+      value = {
+        id = "galletcity_tiles > 78"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0.428571 0.875 0.47619] // uv
+      } // value
+    }
+    {
+      id = "wscmyM"
+      value = {
+        id = "galletcity_tiles > 79"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0.428571 1 0.47619] // uv
+      } // value
+    }
+    {
+      id = "QYUIyg"
+      value = {
+        id = "galletcity_tiles > 80"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0.47619 0.125 0.52381] // uv
+      } // value
+    }
+    {
+      id = "sYgKg4"
+      value = {
+        id = "galletcity_tiles > 81"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0.47619 0.25 0.52381] // uv
+      } // value
+    }
+    {
+      id = "G0MqWw"
+      value = {
+        id = "galletcity_tiles > 82"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0.47619 0.375 0.52381] // uv
+      } // value
+    }
+    {
+      id = "aO0Ocu"
+      value = {
+        id = "galletcity_tiles > 83"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0.47619 0.5 0.52381] // uv
+      } // value
+    }
+    {
+      id = "WwcqyS"
+      value = {
+        id = "galletcity_tiles > 84"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0.47619 0.625 0.52381] // uv
+      } // value
+    }
+    {
+      id = "4osmcG"
+      value = {
+        id = "galletcity_tiles > 85"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0.47619 0.75 0.52381] // uv
+      } // value
+    }
+    {
+      id = "6Wo0io"
+      value = {
+        id = "galletcity_tiles > 86"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0.47619 0.875 0.52381] // uv
+      } // value
+    }
+    {
+      id = "IU2geA"
+      value = {
+        id = "galletcity_tiles > 87"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0.47619 1 0.52381] // uv
+      } // value
+    }
+    {
+      id = "668uCo"
+      value = {
+        id = "galletcity_tiles > 88"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0.52381 0.125 0.571429] // uv
+      } // value
+    }
+    {
+      id = "eAusM0"
+      value = {
+        id = "galletcity_tiles > 89"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0.52381 0.25 0.571429] // uv
+      } // value
+    }
+    {
+      id = "uqkQsK"
+      value = {
+        id = "galletcity_tiles > 90"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0.52381 0.375 0.571429] // uv
+      } // value
+    }
+    {
+      id = "kIe8OO"
+      value = {
+        id = "galletcity_tiles > 91"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0.52381 0.5 0.571429] // uv
+      } // value
+    }
+    {
+      id = "siIsQ4"
+      value = {
+        id = "galletcity_tiles > 92"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0.52381 0.625 0.571429] // uv
+      } // value
+    }
+    {
+      id = "QmmW2G"
+      value = {
+        id = "galletcity_tiles > 93"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0.52381 0.75 0.571429] // uv
+      } // value
+    }
+    {
+      id = "IY4Ucy"
+      value = {
+        id = "galletcity_tiles > 94"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0.52381 0.875 0.571429] // uv
+      } // value
+    }
+    {
+      id = "28ci4e"
+      value = {
+        id = "galletcity_tiles > 95"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0.52381 1 0.571429] // uv
+      } // value
+    }
+    {
+      id = "UckAss"
+      value = {
+        id = "galletcity_tiles > 96"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0.571429 0.125 0.619048] // uv
+      } // value
+    }
+    {
+      id = "iqAS46"
+      value = {
+        id = "galletcity_tiles > 97"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0.571429 0.25 0.619048] // uv
+      } // value
+    }
+    {
+      id = "Q2OkYo"
+      value = {
+        id = "galletcity_tiles > 98"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0.571429 0.375 0.619048] // uv
+      } // value
+    }
+    {
+      id = "kysciO"
+      value = {
+        id = "galletcity_tiles > 99"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0.571429 0.5 0.619048] // uv
+      } // value
+    }
+    {
+      id = "Ukg60C"
+      value = {
+        id = "galletcity_tiles > 100"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0.571429 0.625 0.619048] // uv
+      } // value
+    }
+    {
+      id = "MgqqCM"
+      value = {
+        id = "galletcity_tiles > 101"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0.571429 0.75 0.619048] // uv
+      } // value
+    }
+    {
+      id = "kyAcwg"
+      value = {
+        id = "galletcity_tiles > 102"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0.571429 0.875 0.619048] // uv
+      } // value
+    }
+    {
+      id = "aUuYuY"
+      value = {
+        id = "galletcity_tiles > 103"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0.571429 1 0.619048] // uv
+      } // value
+    }
+    {
+      id = "WS2M8q"
+      value = {
+        id = "galletcity_tiles > 104"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0.619048 0.125 0.666667] // uv
+      } // value
+    }
+    {
+      id = "EQUC2c"
+      value = {
+        id = "galletcity_tiles > 105"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0.619048 0.25 0.666667] // uv
+      } // value
+    }
+    {
+      id = "4AS2QY"
+      value = {
+        id = "galletcity_tiles > 106"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0.619048 0.375 0.666667] // uv
+      } // value
+    }
+    {
+      id = "0gkgCk"
+      value = {
+        id = "galletcity_tiles > 107"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0.619048 0.5 0.666667] // uv
+      } // value
+    }
+    {
+      id = "U4SigC"
+      value = {
+        id = "galletcity_tiles > 108"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0.619048 0.625 0.666667] // uv
+      } // value
+    }
+    {
+      id = "AW0a6s"
+      value = {
+        id = "galletcity_tiles > 109"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0.619048 0.75 0.666667] // uv
+      } // value
+    }
+    {
+      id = "6y8y0Q"
+      value = {
+        id = "galletcity_tiles > 110"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0.619048 0.875 0.666667] // uv
+      } // value
+    }
+    {
+      id = "08wQ6i"
+      value = {
+        id = "galletcity_tiles > 111"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0.619048 1 0.666667] // uv
+      } // value
+    }
+    {
+      id = "40WEkG"
+      value = {
+        id = "galletcity_tiles > 112"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0.666667 0.125 0.714286] // uv
+      } // value
+    }
+    {
+      id = "Coc6mg"
+      value = {
+        id = "galletcity_tiles > 113"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0.666667 0.25 0.714286] // uv
+      } // value
+    }
+    {
+      id = "eouc4S"
+      value = {
+        id = "galletcity_tiles > 114"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0.666667 0.375 0.714286] // uv
+      } // value
+    }
+    {
+      id = "eSGamo"
+      value = {
+        id = "galletcity_tiles > 115"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0.666667 0.5 0.714286] // uv
+      } // value
+    }
+    {
+      id = "88csEq"
+      value = {
+        id = "galletcity_tiles > 116"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0.666667 0.625 0.714286] // uv
+      } // value
+    }
+    {
+      id = "cisYam"
+      value = {
+        id = "galletcity_tiles > 117"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0.666667 0.75 0.714286] // uv
+      } // value
+    }
+    {
+      id = "Icwi4O"
+      value = {
+        id = "galletcity_tiles > 118"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0.666667 0.875 0.714286] // uv
+      } // value
+    }
+    {
+      id = "CmU2mg"
+      value = {
+        id = "galletcity_tiles > 119"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0.666667 1 0.714286] // uv
+      } // value
+    }
+    {
+      id = "6SGAIS"
+      value = {
+        id = "galletcity_tiles > 120"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0.714286 0.125 0.761905] // uv
+      } // value
+    }
+    {
+      id = "OMKm0m"
+      value = {
+        id = "galletcity_tiles > 121"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0.714286 0.25 0.761905] // uv
+      } // value
+    }
+    {
+      id = "CMuskC"
+      value = {
+        id = "galletcity_tiles > 122"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0.714286 0.375 0.761905] // uv
+      } // value
+    }
+    {
+      id = "mKIgAA"
+      value = {
+        id = "galletcity_tiles > 123"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0.714286 0.5 0.761905] // uv
+      } // value
+    }
+    {
+      id = "6qQG0I"
+      value = {
+        id = "galletcity_tiles > 124"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0.714286 0.625 0.761905] // uv
+      } // value
+    }
+    {
+      id = "Oqme4A"
+      value = {
+        id = "galletcity_tiles > 125"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0.714286 0.75 0.761905] // uv
+      } // value
+    }
+    {
+      id = "YYY8EA"
+      value = {
+        id = "galletcity_tiles > 126"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0.714286 0.875 0.761905] // uv
+      } // value
+    }
+    {
+      id = "CO6MOE"
+      value = {
+        id = "galletcity_tiles > 127"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0.714286 1 0.761905] // uv
+      } // value
+    }
+    {
+      id = "C2eU6w"
+      value = {
+        id = "galletcity_tiles > 128"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0.761905 0.125 0.809524] // uv
+      } // value
+    }
+    {
+      id = "eAWeS0"
+      value = {
+        id = "galletcity_tiles > 129"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0.761905 0.25 0.809524] // uv
+      } // value
+    }
+    {
+      id = "MmCkEa"
+      value = {
+        id = "galletcity_tiles > 130"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0.761905 0.375 0.809524] // uv
+      } // value
+    }
+    {
+      id = "2GOauE"
+      value = {
+        id = "galletcity_tiles > 131"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0.761905 0.5 0.809524] // uv
+      } // value
+    }
+    {
+      id = "6oaEsC"
+      value = {
+        id = "galletcity_tiles > 132"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0.761905 0.625 0.809524] // uv
+      } // value
+    }
+    {
+      id = "Kok2yg"
+      value = {
+        id = "galletcity_tiles > 133"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0.761905 0.75 0.809524] // uv
+      } // value
+    }
+    {
+      id = "Csuea6"
+      value = {
+        id = "galletcity_tiles > 134"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0.761905 0.875 0.809524] // uv
+      } // value
+    }
+    {
+      id = "kiYmWS"
+      value = {
+        id = "galletcity_tiles > 135"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0.761905 1 0.809524] // uv
+      } // value
+    }
+    {
+      id = "ayaCuA"
+      value = {
+        id = "galletcity_tiles > 136"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0.809524 0.125 0.857143] // uv
+      } // value
+    }
+    {
+      id = "eyGuyG"
+      value = {
+        id = "galletcity_tiles > 137"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0.809524 0.25 0.857143] // uv
+      } // value
+    }
+    {
+      id = "aUIa6Q"
+      value = {
+        id = "galletcity_tiles > 138"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0.809524 0.375 0.857143] // uv
+      } // value
+    }
+    {
+      id = "iqMA8A"
+      value = {
+        id = "galletcity_tiles > 139"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0.809524 0.5 0.857143] // uv
+      } // value
+    }
+    {
+      id = "uoCCGW"
+      value = {
+        id = "galletcity_tiles > 140"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0.809524 0.625 0.857143] // uv
+      } // value
+    }
+    {
+      id = "8WQeKW"
+      value = {
+        id = "galletcity_tiles > 141"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0.809524 0.75 0.857143] // uv
+      } // value
+    }
+    {
+      id = "AqeqmC"
+      value = {
+        id = "galletcity_tiles > 142"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0.809524 0.875 0.857143] // uv
+      } // value
+    }
+    {
+      id = "6UsQYu"
+      value = {
+        id = "galletcity_tiles > 143"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0.809524 1 0.857143] // uv
+      } // value
+    }
+    {
+      id = "kmsqMU"
+      value = {
+        id = "galletcity_tiles > 144"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0.857143 0.125 0.904762] // uv
+      } // value
+    }
+    {
+      id = "eeIio8"
+      value = {
+        id = "galletcity_tiles > 145"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0.857143 0.25 0.904762] // uv
+      } // value
+    }
+    {
+      id = "CiYI6c"
+      value = {
+        id = "galletcity_tiles > 146"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0.857143 0.375 0.904762] // uv
+      } // value
+    }
+    {
+      id = "miAuIw"
+      value = {
+        id = "galletcity_tiles > 147"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0.857143 0.5 0.904762] // uv
+      } // value
+    }
+    {
+      id = "MIgSme"
+      value = {
+        id = "galletcity_tiles > 148"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0.857143 0.625 0.904762] // uv
+      } // value
+    }
+    {
+      id = "woiGuC"
+      value = {
+        id = "galletcity_tiles > 149"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0.857143 0.75 0.904762] // uv
+      } // value
+    }
+    {
+      id = "my4Wc0"
+      value = {
+        id = "galletcity_tiles > 150"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0.857143 0.875 0.904762] // uv
+      } // value
+    }
+    {
+      id = "kiu22m"
+      value = {
+        id = "galletcity_tiles > 151"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0.857143 1 0.904762] // uv
+      } // value
+    }
+    {
+      id = "mKiu2Q"
+      value = {
+        id = "galletcity_tiles > 152"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0.904762 0.125 0.952381] // uv
+      } // value
+    }
+    {
+      id = "yU4MuO"
+      value = {
+        id = "galletcity_tiles > 153"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0.904762 0.25 0.952381] // uv
+      } // value
+    }
+    {
+      id = "wSakGg"
+      value = {
+        id = "galletcity_tiles > 154"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0.904762 0.375 0.952381] // uv
+      } // value
+    }
+    {
+      id = "0igmKA"
+      value = {
+        id = "galletcity_tiles > 155"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0.904762 0.5 0.952381] // uv
+      } // value
+    }
+    {
+      id = "geoYuw"
+      value = {
+        id = "galletcity_tiles > 156"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0.904762 0.625 0.952381] // uv
+      } // value
+    }
+    {
+      id = "oo6iUs"
+      value = {
+        id = "galletcity_tiles > 157"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0.904762 0.75 0.952381] // uv
+      } // value
+    }
+    {
+      id = "iqsC4G"
+      value = {
+        id = "galletcity_tiles > 158"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0.904762 0.875 0.952381] // uv
+      } // value
+    }
+    {
+      id = "8uecAi"
+      value = {
+        id = "galletcity_tiles > 159"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0.904762 1 0.952381] // uv
+      } // value
+    }
+    {
+      id = "EAGkGS"
+      value = {
+        id = "galletcity_tiles > 160"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0 0.952381 0.125 1] // uv
+      } // value
+    }
+    {
+      id = "IyIWMq"
+      value = {
+        id = "galletcity_tiles > 161"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.125 0.952381 0.25 1] // uv
+      } // value
+    }
+    {
+      id = "2iiUYS"
+      value = {
+        id = "galletcity_tiles > 162"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.25 0.952381 0.375 1] // uv
+      } // value
+    }
+    {
+      id = "UM6WUW"
+      value = {
+        id = "galletcity_tiles > 163"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.375 0.952381 0.5 1] // uv
+      } // value
+    }
+    {
+      id = "4IQA0s"
+      value = {
+        id = "galletcity_tiles > 164"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.5 0.952381 0.625 1] // uv
+      } // value
+    }
+    {
+      id = "YIQAik"
+      value = {
+        id = "galletcity_tiles > 165"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.625 0.952381 0.75 1] // uv
+      } // value
+    }
+    {
+      id = "IoiKaM"
+      value = {
+        id = "galletcity_tiles > 166"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.75 0.952381 0.875 1] // uv
+      } // value
+    }
+    {
+      id = "AeuAMU"
+      value = {
+        id = "galletcity_tiles > 167"
+        local_source = "galletcity_tiles > 0"
+        size = [16 16] // size
+        uv = [0.875 0.952381 1 1] // uv
+      } // value
+    }
+  ] // visuals
+} // tiles_visual

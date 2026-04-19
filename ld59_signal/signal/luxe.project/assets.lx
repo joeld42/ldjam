@@ -37,6 +37,7 @@
   { "15d4b034-31da-4069-928d-64e85c1ab3be" = "luxe: image/scene-open.svg" }
   { "1617aff7-348d-4e0e-a934-42c06aede444" = "luxe: io/" }
   { "16210f60-0869-4d7d-a68f-5c26bfb6be6f" = "luxe: type/entity.asset.wren" }
+  { "1627d438-f5c6-4e14-a4c2-967d09ab861b" = "scene/city.scene/" }
   { "169977e9-2689-4291-9eea-086dbc5e06e1" = "luxe: ui/field/number.wren" }
   { "16be1a03-70ca-4ca3-ac44-6b43063f126e" = "outline/ready.wren" }
   { "193a15e6-5a1b-4bee-b92e-7193d2b6b919" = "luxe: material_basis/color_pick_triangle.material_basis.lx" }
@@ -65,6 +66,7 @@
   { "2209ecd4-565d-43f3-8539-42b5d29e53b3" = "luxe: type/image.asset.wren" }
   { "221efed0-44e5-47ee-9993-673ae489db11" = "luxe: material_basis/wire.material_basis.lx" }
   { "228cc65f-68ed-4bf7-9903-7b436fb85be2" = "luxe: system/vfx/spawn.rate.vfx_module.wren" }
+  { "229fd173-e5d4-4dbc-b3a7-b2e1e726a7c2" = "cards/anais-captured.card.lx" }
   { "22ab8851-2ef8-46fa-b1ec-f30ce657bd20" = "luxe: image/modifier/control.svg" }
   { "22cb3c70-45b5-4aa8-ab9f-01dd29ee89c5" = "luxe: semver.wren" }
   { "242947da-0c98-4769-a7c5-d4ed49ee63b5" = "luxe: image/save-all.svg" }
@@ -165,8 +167,10 @@
   { "55788203-09b4-4a20-9971-677f8d2b4a91" = "luxe: version.wren" }
   { "557c27d0-5c76-4928-b58a-4ad7ddeaff54" = "luxe: sample/" }
   { "55bea3a1-0951-4c0e-a711-ec0c6eacafa2" = "luxe: type/http/server.request.block.wren" }
+  { "5677f1f4-2203-45dc-ba75-67757ad35616" = "image/galletcity_tiles.image.lx" }
   { "56d2aac3-593c-4f46-a3e3-399a57f3e45f" = "outline/renderer.wren" }
   { "58025e8d-05b7-47da-a8ba-5798f990a300" = "luxe: type/image.psd.asset.wren" }
+  { "5867d62e-ff69-4034-bfad-2c0ffe110e26" = "cards/anais-in-danger.card.lx" }
   { "58f90cf0-3a15-4871-9177-d567b177afb8" = "luxe: system/physics/character3D.modifier.api.wren" }
   { "5908c85f-c050-4291-ab05-58f32f43d2af" = "luxe: type/modifier.asset.wren" }
   { "594741d0-58dc-482f-aa3f-83a5eaf32683" = "luxe: noise.wren" }
@@ -178,6 +182,7 @@
   { "5b22cdba-51cc-4099-943c-a6b08a48f3c1" = "image/cardframe.image.lx" }
   { "5bba6963-bd5a-44cf-aa7a-83aae1cff5e7" = "luxe: triangulate.wren" }
   { "5cb370b8-6bcc-4e9c-a38e-a350966d2ffe" = "luxe: style/" }
+  { "5e3e977d-e4fc-47a9-9e07-0721f65d7428" = "cards/paranoia.card.lx" }
   { "5f283252-ffdc-47e5-aa11-b4efb2786a0b" = "luxe: ui/tabs.wren" }
   { "602265e1-be17-452c-9985-223b379b9eef" = "luxe: project.wren" }
   { "61a111c8-3340-42a6-b098-6e220b054f48" = "luxe: ui/field/framemarks.wren" }
@@ -197,6 +202,7 @@
   { "67e372fc-1fd3-4253-97ef-ba9ee9c15124" = "luxe: build/wrenalyzer/ast.wren" }
   { "68a03be6-31e5-464b-be3a-a47941572aa7" = "luxe: ui/style/window.style_type.wren" }
   { "6a012a92-2241-4b0f-933c-a1608e7e3506" = "luxe: regex.wren" }
+  { "6a57e7b8-f9c5-46b1-81c1-79fb1ca23f81" = "image/galletcity_tiles.png" }
   { "6aa35469-6318-4710-a35f-773f78aac586" = "luxe: type/text.style.asset.wren" }
   { "6ad2f740-7e7b-4037-92e1-d2efa91dc6ec" = "luxe: system/transform.change.block.wren" }
   { "6af570e8-5050-48b0-8c28-aa0a5c884953" = "luxe: image/select-inverse.svg" }
@@ -243,6 +249,7 @@
   { "83527e80-d6f9-49fd-81a3-a861cd359b1d" = "luxe: id.wren" }
   { "83fbeb69-d9cd-483f-a36e-b8704de6fb48" = "luxe: system/physics/query.block.wren" }
   { "84513e56-8c2c-4638-b983-dd6f651af88f" = "luxe: material/logo.sprite.material.lx" }
+  { "84654d16-83f1-49ec-bf13-b01b87bae848" = "tiles/" }
   { "8479ffe5-6912-4fd1-bd04-c42222934166" = "luxe: sample/game.wren" }
   { "84b898fd-1055-47c4-8db4-f11cc329e378" = "luxe: type/vfx/module.asset.wren" }
   { "850c027b-6078-4469-8b25-d417affce745" = "luxe: ui/field/" }
@@ -340,10 +347,12 @@
   { "ba469185-8393-4cd5-adca-65e365e25d4b" = "luxe: type/editor/" }
   { "ba5df728-f35e-4c16-b8ea-80b9c1f9a71e" = "luxe: type/tiles.visual.asset.wren" }
   { "ba914d9c-356d-45c9-89b9-4e8e0ebd5a2e" = "cards/starter.card.lx" }
+  { "bacb0a17-b532-4f78-9ab1-54bbae005faa" = "scene/city.scene/city.scene.lx" }
   { "bbed69d1-40fe-477c-a348-b653fac545ae" = "luxe: type/material.asset.wren" }
   { "bc22c6c7-139f-4229-8fbf-44a02d7b9037" = "luxe: system/ui/control.modifier.api.wren" }
   { "bc79fc5d-53bd-4233-973c-74d0e486aa6b" = "luxe: ui/scroll.control.api.wren" }
   { "bc9adffb-e731-4475-a9c8-550351d09091" = "luxe: templates/text.prototype/text.prototype.lx" }
+  { "bccb8aeb-d2ae-4be1-9e9a-6e9f7a5da613" = "tiles/citytiles.tiles.lx" }
   { "bd93f564-5325-42bf-8d8f-4dac846270f2" = "luxe: draw.wren" }
   { "be5deb48-0e4e-4488-a714-07631ac8da5b" = "luxe: type/block_def.asset.wren" }
   { "bfe1ba5f-2a76-48b5-a850-05f8954a638b" = "luxe: build/wrenalyzer/scope.wren" }
@@ -361,6 +370,7 @@
   { "c6a5c2f8-d7d4-4c98-9f8a-ef0486fad66d" = "luxe: image/select-siblings.svg" }
   { "c7486437-d078-4540-915f-d7c66398429f" = "luxe: system/ui/ui.modifier.wren" }
   { "c7bdc1e2-7bf6-4f7b-a95b-6e9447f3cd16" = "luxe: build/wrenalyzer/parser.wren" }
+  { "c7c40cd2-2796-4a4b-8ccc-f137a32cec11" = "scene/city.scene/citymap.entity.lx" }
   { "c7ed2038-1ebf-4884-a834-debaa699989c" = "luxe: system/physics/physics3D.modifier.wren" }
   { "c86c3b48-d5fa-4247-908f-357d70730331" = "luxe: system/sound.modifier.wren" }
   { "c91150a9-4aed-4417-a85e-290d83db5743" = "luxe: ui/style/luxe.dark.label.style.lx" }
@@ -384,6 +394,7 @@
   { "cef56cd9-cabd-4c02-a98f-c899b3a94d5a" = "luxe: image/luxe.char.png" }
   { "cf8680e1-b790-42d0-8ff1-ebdcd7e7c197" = "luxe: type/vfx/" }
   { "cf953544-8e72-4883-8eb6-21b8c0c2a2ce" = "luxe: build/compiler.wren" }
+  { "cfc9eae6-06bb-43c3-9173-734c853da586" = "citygame.wren" }
   { "d0a026a0-9e6f-4cc2-9256-c89300382dda" = "tktween: system/tktween.modifier.api.wren" }
   { "d0a92445-3038-4a35-91a9-cb50a8ed3f50" = "luxe: type/font.face.asset.wren" }
   { "d0c00e3d-65d9-408f-924e-989edf798435" = "luxe: image/visible.off.png" }
@@ -424,6 +435,7 @@
   { "dfaf9294-f2e8-4224-a3dd-5a7080a7db7c" = "scene/mainmenu.scene/" }
   { "e0538293-23c0-49c0-9c4b-ceab2020fe78" = "luxe: type/audio.asset.wren" }
   { "e1a89f68-5dbf-4881-9d40-d06f5cdb95b8" = "luxe: system/vfx/spawn.burst.vfx_module.wren" }
+  { "e31f0112-8641-4f37-bf6e-acd7e3c2a811" = "tiles/citytiles-visual.tiles_visual.lx" }
   { "e345f4df-d28c-45b2-bb79-c0e589169f5e" = "luxe: docgen.wren" }
   { "e3f6c699-d7d7-4645-945b-43a84a1a101e" = "luxe: build/deploy/deploy.wren" }
   { "e47dd647-4471-46be-92df-f65ace79dbf0" = "luxe: build/materials.wren" }

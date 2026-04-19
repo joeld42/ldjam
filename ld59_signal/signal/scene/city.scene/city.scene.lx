@@ -1,0 +1,10 @@
+scene = {
+  modifiers = [
+    {
+      type = "luxe: system/transform.modifier"
+    }
+  ] // modifiers
+  name = "scene/city"
+  uuid = "834ede63-be84-4854-ac21-dd4273b08f52"
+  visible = true
+} // scene

@@ -1,12 +1,14 @@
 card = {
   title = "Anais"
   text = "Anais runs a flower shop in the old city. She sends coded messages to $AGENT by arranging the window display."
-    outcomes = [      {
-         id = "CL1Pzy"
+    outcomes = [
+      {
+         id = "hqKokq"
          value = {
             prompt = ""
             cmds = ""
          } // value
       } // outcome
-    ] // outcomes} // card
+    ] // outcomes
+} // card
 

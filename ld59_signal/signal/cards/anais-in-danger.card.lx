@@ -1,19 +1,21 @@
 card = {
   title = "In Danger"
   text = "Anais put four red carnations in the window display. That's her emergency signal!"
-    outcomes = [      {
-         id = "MxCXQN"
+    outcomes = [
+      {
+         id = "MCCge0"
          value = {
             prompt = "Send an extraction team. Let's get her to safety. "
             cmds = "Extract()"
          } // value
       } // outcome
       {
-         id = "UsHBDQ"
+         id = "m2jiHS"
          value = {
             prompt = "Stop in to her shop. See what she needs. "
             cmds = "Remove(anais);Add(anais-captured)"
          } // value
       } // outcome
-    ] // outcomes} // card
+    ] // outcomes
+} // card
 

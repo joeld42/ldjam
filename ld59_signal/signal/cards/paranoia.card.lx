@@ -1,19 +1,21 @@
 card = {
   title = "Paranoia Strikes Deep"
   text = "$ASSET reports feeling as if they are being watched."
-    outcomes = [      {
-         id = "uz8DzN"
+    outcomes = [
+      {
+         id = "k1O5tp"
          value = {
             prompt = "They should go to ground for a while. "
             cmds = "Discard($ASSET)"
          } // value
       } // outcome
       {
-         id = "3dJcGP"
+         id = "qnxKDH"
          value = {
             prompt = "It's nothing.  "
             cmds = "SusUp(50%)"
          } // value
       } // outcome
-    ] // outcomes} // card
+    ] // outcomes
+} // card
 

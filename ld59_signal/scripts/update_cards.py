@@ -57,7 +57,7 @@ def dump_cards( cards  ):
 			fp.write(f'  text = "{text}"\n')
 
 			if len(outcomes):
-				fp.write('    outcomes = [')
+				fp.write('    outcomes = [\n')
 				for oc in outcomes:
 					ocid = generate_id()
 					fp.write('      {\n')
@@ -67,7 +67,7 @@ def dump_cards( cards  ):
 					fp.write(f'            cmds = "{oc[1]}"\n')
 					fp.write('         } // value\n')
 					fp.write('      } // outcome\n')
-				fp.write('    ] // outcomes')
+				fp.write('    ] // outcomes\n')
 
 			fp.write("} // card\n\n")
 	
