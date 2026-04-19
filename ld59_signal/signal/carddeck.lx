@@ -1,0 +1,11 @@
+[
+    {
+        title = "Station Head"
+        cardtype = "event"
+        text = "Good Morning, Control. Welcome to station. Your first order of business should be rebuilding our network, recent events have left us somewhat, uh, thin."
+        options = [
+            prompt="Understood!"
+            result=[]
+        ]
+    }
+]

@@ -1,0 +1,19 @@
+entity = {
+  modifiers = [
+    {
+      color = [1 0.999995 0.999996 1] // color
+      font = "luxe: font/lato-bold"
+      type = "luxe: system/text.modifier"
+    }
+    {
+      link = [
+        "fe38656f-2a39-4763-80d8-d3d1d1540013"
+      ] // link
+      pos = [0 91 100] // pos
+      type = "luxe: system/transform.modifier"
+    }
+  ] // modifiers
+  name = "title"
+  uuid = "2425042e-fffe-4b6c-8195-3a0b89bd7227"
+  visible = true
+} // entity

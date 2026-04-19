@@ -1,0 +1,22 @@
+entity = {
+  modifiers = [
+    {
+      image = "image/cardframe"
+      size = [120 180] // size
+      type = "luxe: system/sprite.modifier"
+    }
+    {
+      type = "luxe: system/tags.modifier"
+    }
+    {
+      link = [
+        "8628caca-0a93-46b4-b717-c3022c99100a"
+      ] // link
+      pos = [178 -52 2] // pos
+      type = "luxe: system/transform.modifier"
+    }
+  ] // modifiers
+  name = "cardback"
+  uuid = "fe38656f-2a39-4763-80d8-d3d1d1540013"
+  visible = true
+} // entity

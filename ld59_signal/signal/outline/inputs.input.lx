@@ -1,0 +1,25 @@
+input = {
+  nodes = [
+    { name = "ui"    where = "front"      channels = ["c01"] }
+    { name = "game"  where = "after: ui"  channels = ["c02"] }
+  ]
+
+  map = {
+    
+    left = { keys = ["key_a", "left"] }
+    right = { keys = ["key_d", "right"] }
+    up = { keys = ["key_w", "up"] }
+    down = { keys = ["key_s", "down"] }
+    
+    jump = {
+      keys = ["key_x", "up", "key_w", "space"]
+      mouse = ["left"]
+      gamepad = [0]
+    }
+
+    next = {
+      keys = ["key_x", "up", "key_w", "space", "enter", "escape"]
+      mouse = ["left", "right"]
+    }
+  }
+}

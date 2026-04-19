@@ -1,0 +1,4 @@
+app = {
+  name = "signal"
+  organization = "myorg"
+}

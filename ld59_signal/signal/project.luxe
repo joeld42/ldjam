@@ -1,0 +1,13 @@
+import "luxe: project" for Entry
+
+class Project is Entry {
+
+  construct entry(target) {
+
+    name = "signal"
+    renderer = "outline/renderer"
+    settings = "outline/settings"
+
+  } //new
+
+} //Project

@@ -1,0 +1,20 @@
+card = {
+    title = "Test Card"
+    text = "This is a test card ASDF."
+    outcomes = [
+        {
+            id = "000001"
+            value = {
+                prompt = "Hello"
+                cmds = "A;B;C"
+            }
+        }
+        {
+            id = "000002"
+            value = {
+                prompt = "Goodbye"
+                cmds = "D;E"
+            }
+        }
+    ] // outcomes
+}

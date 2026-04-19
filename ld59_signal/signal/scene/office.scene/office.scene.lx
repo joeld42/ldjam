@@ -1,0 +1,10 @@
+scene = {
+  modifiers = [
+    {
+      type = "luxe: system/transform.modifier"
+    }
+  ] // modifiers
+  name = "scene/office"
+  uuid = "8628caca-0a93-46b4-b717-c3022c99100a"
+  visible = true
+} // scene

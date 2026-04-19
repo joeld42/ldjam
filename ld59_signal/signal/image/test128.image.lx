@@ -1,0 +1,5 @@
+image = {
+  format = "rgba8Unorm"
+  generate_mipmaps_at_load = false
+  source = "image/test128.png"
+} // image

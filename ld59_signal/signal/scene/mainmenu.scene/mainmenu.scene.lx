@@ -1,0 +1,10 @@
+scene = {
+  modifiers = [
+    {
+      type = "luxe: system/transform.modifier"
+    }
+  ] // modifiers
+  name = "scene/mainmenu"
+  uuid = "e1c7a6ed-2fb7-4daa-93b9-2577401334e7"
+  visible = true
+} // scene

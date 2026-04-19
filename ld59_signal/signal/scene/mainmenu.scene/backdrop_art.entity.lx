@@ -1,0 +1,22 @@
+entity = {
+  modifiers = [
+    {
+      image = "image/title_screen"
+      size = [320 240] // size
+      type = "luxe: system/sprite.modifier"
+    }
+    {
+      type = "luxe: system/tags.modifier"
+    }
+    {
+      link = [
+        "e1c7a6ed-2fb7-4daa-93b9-2577401334e7"
+      ] // link
+      pos = [160 120 0] // pos
+      type = "luxe: system/transform.modifier"
+    }
+  ] // modifiers
+  name = "backdrop_art"
+  uuid = "8456a8ee-38fc-4d6e-bfb4-be5dd23dac83"
+  visible = true
+} // entity

@@ -1,0 +1,17 @@
+entity = {
+  modifiers = [
+    {
+      type = "luxe: system/text.modifier"
+    }
+    {
+      link = [
+        "e1c7a6ed-2fb7-4daa-93b9-2577401334e7"
+      ] // link
+      pos = [169 212 1] // pos
+      type = "luxe: system/transform.modifier"
+    }
+  ] // modifiers
+  name = "entity.Lwn"
+  uuid = "ac68d524-7d17-4132-9b7d-b4204929149e"
+  visible = true
+} // entity
